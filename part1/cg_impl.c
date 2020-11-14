@@ -496,24 +496,24 @@ void init(double *zeta) {
           (double(*)[NONZER + 1])(void *)aelt,
           iv);
 
-//---------------------------------------------------------------------
-// Note: as a result of the above call to makea:
-//      values of j used in indexing rowstr go from 0 --> lastrow-firstrow
-//      values of colidx which are col indexes go from firstcol --> lastcol
-//      So:
-//      Shift the col index vals from actual (firstcol --> lastcol )
-//      to local, i.e., (0 --> lastcol-firstcol)
-//---------------------------------------------------------------------
-// #pragma omp parallel for collapse(2)
+    //---------------------------------------------------------------------
+    // Note: as a result of the above call to makea:
+    //      values of j used in indexing rowstr go from 0 --> lastrow-firstrow
+    //      values of colidx which are col indexes go from firstcol --> lastcol
+    //      So:
+    //      Shift the col index vals from actual (firstcol --> lastcol )
+    //      to local, i.e., (0 --> lastcol-firstcol)
+    //---------------------------------------------------------------------
+#pragma omp parallel for
     for (j = 0; j < lastrow - firstrow + 1; j++) {
         for (k = rowstr[j]; k < rowstr[j + 1]; k++) {
             colidx[k] = colidx[k] - firstcol;
         }
     }
 
-//---------------------------------------------------------------------
-// set starting vector to (1, 1, .... 1)
-//---------------------------------------------------------------------
+    //---------------------------------------------------------------------
+    // set starting vector to (1, 1, .... 1)
+    //---------------------------------------------------------------------
 #pragma omp parallel for
     for (i = 0; i < NA + 1; i++) {
         x[i] = 1.0;
