@@ -18,10 +18,10 @@ void conj_grad(int colidx[],
 
     rho = 0.0;
 
-//---------------------------------------------------------------------
-// Initialize the CG algorithm:
-//---------------------------------------------------------------------
-#pragma omp parallel for
+    //---------------------------------------------------------------------
+    // Initialize the CG algorithm:
+    //---------------------------------------------------------------------
+    #pragma omp parallel for
     for (j = 0; j < naa + 1; j++) {
         q[j] = 0.0;
         z[j] = 0.0;
@@ -29,35 +29,32 @@ void conj_grad(int colidx[],
         p[j] = r[j];
     }
 
-//---------------------------------------------------------------------
-// rho = r.r
-// Now, obtain the norm of r: First, sum squares of r elements locally...
-//---------------------------------------------------------------------
-#pragma omp parallel for reduction(+ \
-                                   : rho)
+    //---------------------------------------------------------------------
+    // rho = r.r
+    // Now, obtain the norm of r: First, sum squares of r elements locally...
+    //---------------------------------------------------------------------
+    #pragma omp parallel for reduction(+:rho)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
         rho = rho + r[j] * r[j];
     }
-
     //---------------------------------------------------------------------
     //---->
     // The conj grad iteration loop
     //---->
     //---------------------------------------------------------------------
     for (cgit = 1; cgit <= cgitmax; cgit++) {
-//---------------------------------------------------------------------
-// q = A.p
-// The partition submatrix-vector multiply: use workspace w
-//---------------------------------------------------------------------
-//
-// NOTE: this version of the multiply is actually (slightly: maybe %5)
-//       faster on the sp2 on 16 nodes than is the unrolled-by-2 version
-//       below.   On the Cray t3d, the reverse is true, i.e., the
-//       unrolled-by-two version is some 10% faster.
-//       The unrolled-by-8 version below is significantly faster
-//       on the Cray t3d - overall speed of code is 1.5 times faster.
-#pragma omp parallel for reduction(+ \
-                                   : sum)
+    //---------------------------------------------------------------------
+    // q = A.p
+    // The partition submatrix-vector multiply: use workspace w
+    //---------------------------------------------------------------------
+    //
+    // NOTE: this version of the multiply is actually (slightly: maybe %5)
+    //       faster on the sp2 on 16 nodes than is the unrolled-by-2 version
+    //       below.   On the Cray t3d, the reverse is true, i.e., the
+    //       unrolled-by-two version is some 10% faster.
+    //       The unrolled-by-8 version below is significantly faster
+    //       on the Cray t3d - overall speed of code is 1.5 times faster.
+        #pragma omp parallel for reduction(+:sum)
         for (j = 0; j < lastrow - firstrow + 1; j++) {
             sum = 0.0;
             for (k = rowstr[j]; k < rowstr[j + 1]; k++) {
@@ -65,13 +62,11 @@ void conj_grad(int colidx[],
             }
             q[j] = sum;
         }
-
         //---------------------------------------------------------------------
         // Obtain p.q
         //---------------------------------------------------------------------
         d = 0.0;
-#pragma omp parallel for reduction(+ \
-                                   : d)
+        #pragma omp parallel for reduction(+:d)
         for (j = 0; j < lastcol - firstcol + 1; j++) {
             d = d + p[j] * q[j];
         }
@@ -91,31 +86,29 @@ void conj_grad(int colidx[],
         // and    r = r - alpha*q
         //---------------------------------------------------------------------
         rho = 0.0;
-#pragma omp parallel for
+        #pragma omp parallel for
         for (j = 0; j < lastcol - firstcol + 1; j++) {
             z[j] = z[j] + alpha * p[j];
             r[j] = r[j] - alpha * q[j];
         }
 
-//---------------------------------------------------------------------
-// rho = r.r
-// Now, obtain the norm of r: First, sum squares of r elements locally...
-//---------------------------------------------------------------------
-#pragma omp parallel for reduction(+ \
-                                   : rho)
+        //---------------------------------------------------------------------
+        // rho = r.r
+        // Now, obtain the norm of r: First, sum squares of r elements locally...
+        //---------------------------------------------------------------------
+        #pragma omp parallel for reduction(+: rho)
         for (j = 0; j < lastcol - firstcol + 1; j++) {
-            rho = rho + r[j] * r[j];
+                rho = rho + r[j] * r[j];
         }
-
         //---------------------------------------------------------------------
         // Obtain beta:
         //---------------------------------------------------------------------
         beta = rho / rho0;
 
-//---------------------------------------------------------------------
-// p = r + beta*p
-//---------------------------------------------------------------------
-#pragma omp parallel for
+        //---------------------------------------------------------------------
+        // p = r + beta*p
+        //---------------------------------------------------------------------
+        #pragma omp parallel for
         for (j = 0; j < lastcol - firstcol + 1; j++) {
             p[j] = r[j] + beta * p[j];
         }
@@ -127,8 +120,7 @@ void conj_grad(int colidx[],
     // The partition submatrix-vector multiply
     //---------------------------------------------------------------------
     sum = 0.0;
-#pragma omp parallel for reduction(+ \
-                                   : d)
+    #pragma omp parallel for reduction(+: d)
     for (j = 0; j < lastrow - firstrow + 1; j++) {
         d = 0.0;
         for (k = rowstr[j]; k < rowstr[j + 1]; k++) {
@@ -137,11 +129,10 @@ void conj_grad(int colidx[],
         r[j] = d;
     }
 
-//---------------------------------------------------------------------
-// At this point, r contains A.z
-//---------------------------------------------------------------------
-#pragma omp parallel for reduction(+ \
-                                   : sum)
+    //---------------------------------------------------------------------
+    // At this point, r contains A.z
+    //---------------------------------------------------------------------
+    #pragma omp parallel for reduction(+: sum)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
         d = x[j] - r[j];
         sum = sum + d * d;
@@ -264,7 +255,7 @@ void sparse(double a[],
 //---------------------------------------------------------------------
 // ...count the number of triples in each row
 //---------------------------------------------------------------------
-#pragma omp parallel for
+    #pragma omp parallel for
     for (j = 0; j < nrows + 1; j++) {
         rowstr[j] = 0;
     }
@@ -387,7 +378,7 @@ void sparse(double a[],
         }
     }
 
-#pragma omp parallel for
+    #pragma omp parallel for
     for (j = 1; j < nrows + 1; j++) {
         rowstr[j] = rowstr[j] - nzloc[j - 1];
     }
@@ -454,7 +445,7 @@ void vecset(int n, double v[], int iv[], int *nzv, int i, double val) {
     logical set;
 
     set = false;
-#pragma omp parallel for
+    #pragma omp parallel for
     for (k = 0; k < *nzv; k++) {
         if (iv[k] == i) {
             v[k] = val;
@@ -504,7 +495,7 @@ void init(double *zeta) {
     //      Shift the col index vals from actual (firstcol --> lastcol )
     //      to local, i.e., (0 --> lastcol-firstcol)
     //---------------------------------------------------------------------
-#pragma omp parallel for
+    #pragma omp parallel for
     for (j = 0; j < lastrow - firstrow + 1; j++) {
         for (k = rowstr[j]; k < rowstr[j + 1]; k++) {
             colidx[k] = colidx[k] - firstcol;
@@ -514,11 +505,11 @@ void init(double *zeta) {
     //---------------------------------------------------------------------
     // set starting vector to (1, 1, .... 1)
     //---------------------------------------------------------------------
-#pragma omp parallel for
+    #pragma omp parallel for
     for (i = 0; i < NA + 1; i++) {
         x[i] = 1.0;
     }
-#pragma omp parallel for
+    #pragma omp parallel for
     for (j = 0; j < lastcol - firstcol + 1; j++) {
         q[j] = 0.0;
         z[j] = 0.0;
@@ -542,8 +533,7 @@ void iterate(double *zeta, int *it) {
     //---------------------------------------------------------------------
     norm_temp1 = 0.0;
     norm_temp2 = 0.0;
-#pragma omp parallel for reduction(+ \
-                                   : norm_temp1, norm_temp2)
+    #pragma omp parallel for reduction(+: norm_temp1, norm_temp2)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
         norm_temp1 = norm_temp1 + x[j] * z[j];
         norm_temp2 = norm_temp2 + z[j] * z[j];
@@ -559,7 +549,7 @@ void iterate(double *zeta, int *it) {
 //---------------------------------------------------------------------
 // Normalize z to obtain x
 //---------------------------------------------------------------------
-#pragma omp parallel for
+    #pragma omp parallel for
     for (j = 0; j < lastcol - firstcol + 1; j++) {
         x[j] = norm_temp2 * z[j];
     }
