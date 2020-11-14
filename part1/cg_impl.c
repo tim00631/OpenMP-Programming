@@ -288,8 +288,9 @@ void sparse(double a[],
     //---------------------------------------------------------------------
     // ... preload data pages
     //---------------------------------------------------------------------
-    #pragma omp parallel for collapse(2)
+    // #pragma omp parallel for collapse(2)
     for (j = 0; j < nrows; j++) {
+        #pragma omp parallel for
         for (k = rowstr[j]; k < rowstr[j + 1]; k++) {
             a[k] = 0.0;
             colidx[k] = -1;
