@@ -504,7 +504,7 @@ void init(double *zeta) {
 //      Shift the col index vals from actual (firstcol --> lastcol )
 //      to local, i.e., (0 --> lastcol-firstcol)
 //---------------------------------------------------------------------
-#pragma omp parallel for collapse(2)
+// #pragma omp parallel for collapse(2)
     for (j = 0; j < lastrow - firstrow + 1; j++) {
         for (k = rowstr[j]; k < rowstr[j + 1]; k++) {
             colidx[k] = colidx[k] - firstcol;
