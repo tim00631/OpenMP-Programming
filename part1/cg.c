@@ -6,12 +6,14 @@
 #include "randdp.h"
 #include "timers.h"
 #include "cg_impl.h"
+#include <omp.h>
 
 void init(double *zeta);
 void iterate(double *zeta, int *it);
 
 int main(int argc, char *argv[])
 {
+  omp_set_num_thread(omp_get_max_threads());
   int i, j, k, it;
 
   double zeta;
@@ -24,6 +26,7 @@ int main(int argc, char *argv[])
 
   char *t_names[T_last];
 
+  #pragma omp parallel for
   for (i = 0; i < T_last; i++)
   {
     timer_clear(i);
@@ -55,6 +58,7 @@ int main(int argc, char *argv[])
   //---------------------------------------------------------------------
   // set starting vector to (1, 1, .... 1)
   //---------------------------------------------------------------------
+  #pragma omp parallel for
   for (i = 0; i < NA + 1; i++)
   {
     x[i] = 1.0;
