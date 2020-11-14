@@ -260,7 +260,7 @@ void sparse(double a[],
     for (j = 0; j < nrows + 1; j++) {
         rowstr[j] = 0;
     }
-    #pragma omp parallel for
+    // #pragma omp parallel for
     for (i = 0; i < n; i++) {
         for (nza = 0; nza < arow[i]; nza++) {
             j = acol[i][nza] + 1;
@@ -289,7 +289,7 @@ void sparse(double a[],
     //---------------------------------------------------------------------
     // #pragma omp parallel for collapse(2)
     for (j = 0; j < nrows; j++) {
-        #pragma omp parallel for
+        // #pragma omp parallel for
         for (k = rowstr[j]; k < rowstr[j + 1]; k++) {
             a[k] = 0.0;
             colidx[k] = -1;
