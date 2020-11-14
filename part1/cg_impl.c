@@ -43,17 +43,17 @@ void conj_grad(int colidx[],
     //---->
     //---------------------------------------------------------------------
     for (cgit = 1; cgit <= cgitmax; cgit++) {
-    //---------------------------------------------------------------------
-    // q = A.p
-    // The partition submatrix-vector multiply: use workspace w
-    //---------------------------------------------------------------------
-    //
-    // NOTE: this version of the multiply is actually (slightly: maybe %5)
-    //       faster on the sp2 on 16 nodes than is the unrolled-by-2 version
-    //       below.   On the Cray t3d, the reverse is true, i.e., the
-    //       unrolled-by-two version is some 10% faster.
-    //       The unrolled-by-8 version below is significantly faster
-    //       on the Cray t3d - overall speed of code is 1.5 times faster.
+        //---------------------------------------------------------------------
+        // q = A.p
+        // The partition submatrix-vector multiply: use workspace w
+        //---------------------------------------------------------------------
+        //
+        // NOTE: this version of the multiply is actually (slightly: maybe %5)
+        //       faster on the sp2 on 16 nodes than is the unrolled-by-2 version
+        //       below.   On the Cray t3d, the reverse is true, i.e., the
+        //       unrolled-by-two version is some 10% faster.
+        //       The unrolled-by-8 version below is significantly faster
+        //       on the Cray t3d - overall speed of code is 1.5 times faster.
         #pragma omp parallel for reduction(+:sum)
         for (j = 0; j < lastrow - firstrow + 1; j++) {
             sum = 0.0;
@@ -86,6 +86,7 @@ void conj_grad(int colidx[],
         // and    r = r - alpha*q
         //---------------------------------------------------------------------
         rho = 0.0;
+
         #pragma omp parallel for
         for (j = 0; j < lastcol - firstcol + 1; j++) {
             z[j] = z[j] + alpha * p[j];
@@ -96,7 +97,7 @@ void conj_grad(int colidx[],
         // rho = r.r
         // Now, obtain the norm of r: First, sum squares of r elements locally...
         //---------------------------------------------------------------------
-        #pragma omp parallel for reduction(+: rho)
+        #pragma omp parallel for reduction(+:rho)
         for (j = 0; j < lastcol - firstcol + 1; j++) {
                 rho = rho + r[j] * r[j];
         }
@@ -120,7 +121,7 @@ void conj_grad(int colidx[],
     // The partition submatrix-vector multiply
     //---------------------------------------------------------------------
     sum = 0.0;
-    #pragma omp parallel for reduction(+: d)
+    #pragma omp parallel for reduction(+:d)
     for (j = 0; j < lastrow - firstrow + 1; j++) {
         d = 0.0;
         for (k = rowstr[j]; k < rowstr[j + 1]; k++) {
@@ -132,7 +133,7 @@ void conj_grad(int colidx[],
     //---------------------------------------------------------------------
     // At this point, r contains A.z
     //---------------------------------------------------------------------
-    #pragma omp parallel for reduction(+: sum)
+    #pragma omp parallel for reduction(+:sum)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
         d = x[j] - r[j];
         sum = sum + d * d;
@@ -252,14 +253,14 @@ void sparse(double a[],
     //---------------------------------------------------------------------
     nrows = lastrow - firstrow + 1;
 
-//---------------------------------------------------------------------
-// ...count the number of triples in each row
-//---------------------------------------------------------------------
+    //---------------------------------------------------------------------
+    // ...count the number of triples in each row
+    //---------------------------------------------------------------------
     #pragma omp parallel for
     for (j = 0; j < nrows + 1; j++) {
         rowstr[j] = 0;
     }
-
+    #pragma omp parallel for collapse(2)
     for (i = 0; i < n; i++) {
         for (nza = 0; nza < arow[i]; nza++) {
             j = acol[i][nza] + 1;
@@ -286,6 +287,7 @@ void sparse(double a[],
     //---------------------------------------------------------------------
     // ... preload data pages
     //---------------------------------------------------------------------
+    #pragma omp parallel for collapse(2)
     for (j = 0; j < nrows; j++) {
         for (k = rowstr[j]; k < rowstr[j + 1]; k++) {
             a[k] = 0.0;
