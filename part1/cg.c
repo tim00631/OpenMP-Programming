@@ -13,7 +13,7 @@ void iterate(double *zeta, int *it);
 
 int main(int argc, char *argv[])
 {
-  omp_set_num_thread(omp_get_max_threads());
+  omp_set_num_threads(omp_get_max_threads());
   int i, j, k, it;
 
   double zeta;
