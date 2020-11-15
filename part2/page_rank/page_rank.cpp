@@ -25,14 +25,15 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 	double equal_prob = 1.0 / numNodes;
 	double *score_new = (double *)malloc(sizeof(double) * numNodes);
 	double *diff = (double *)malloc(sizeof(double) * numNodes);
-	#pragma omp parallel for
+	// #pragma omp parallel for
 	for (int i = 0; i < numNodes; ++i) {
 		solution[i] = equal_prob;
 	}
-	double global_diff = 0.0;
+	double global_diff = 1;
 	while (global_diff > convergence) {
 		global_diff = 0.0;
 		// #pragma omp parallel for reduction(+:global_diff)
+		// compute score_new[vi] for all nodes vi:
 		for (int i=0; i<num_nodes(g); i++) {
 		// Vertex is typedef'ed to an int. Vertex* points into g.outgoing_edges[]
 			const Vertex* start = incoming_begin(g, i);
