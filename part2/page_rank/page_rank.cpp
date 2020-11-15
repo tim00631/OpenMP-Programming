@@ -63,7 +63,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 		// 	score_new[i] = 0;
 		// }
 		// converged = (global_diff < convergence);
-
+		double global_diff = 0.0;
 		for (int i=0;i<numNodes;i++){
 			const Vertex* start = incoming_begin(g, i);
 			const Vertex* end = incoming_end(g, i);
