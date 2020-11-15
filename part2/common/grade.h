@@ -74,8 +74,9 @@ bool compareApprox(Graph graph, T* ref, T* stu)
 {
   for (int i = 0; i < graph->num_nodes; i++) {
     if (fabs(ref[i] - stu[i]) > EPSILON) {
+      std::cerr.precision(17);
       std::cerr << "*** Results disagree at " << i << " expected " 
-        << ref[i] << " found " << stu[i] << std::endl;
+        << fixed<<ref[i] << " found " << fixed<<stu[i] << std::endl;
       return false;
     }
   }
