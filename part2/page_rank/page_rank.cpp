@@ -22,13 +22,12 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 	// precision scores are used to avoid underflow for large graphs
 	int numNodes = num_nodes(g);
 	double equal_prob = 1.0 / (double)numNodes;
-	// #pragma omp parallel for
+	#pragma omp parallel for
 	for (int i = 0; i < numNodes; ++i) {
 		solution[i] = equal_prob;
 	}
 
 	double *score_new = (double *)malloc(sizeof(double) * numNodes);
-	double *diff = (double *)malloc(sizeof(double) * numNodes);
 
 	bool converged = false;
 	while (!converged) {
@@ -38,16 +37,18 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 			const Vertex* end = incoming_end(g, i);
 			// 	score_new[vi] = sum over all nodes vj reachable from incoming edges
 			//  					{ score_old[vj] / number of edges leaving vj  }
+			#pragma omp parallel for reduction(+:score_new[i])
 			for (const Vertex* j=start; j!=end; j++) {
-				int j_outDegree = outgoing_size(g, *j);
-				if(j_outDegree) {
-					score_new[i] += solution[*j] / (double)j_outDegree;
+				int j_outdegree = outgoing_size(g, *j);
+				if(j_outdegree) {
+					score_new[i] += solution[*j] / (double)j_outdegree;
 				}
 			}
-			score_new[i] = (damping * score_new[i]) + (1.0-damping)/ (double)numNodes;
 			// score_new[vi] = (damping * score_new[vi]) + (1.0-damping) / numNodes;
+			score_new[i] = (damping * score_new[i]) + (1.0-damping)/ (double)numNodes;
 			// score_new[vi] += sum over all nodes v in graph with no outgoing edges
 			// 						{ damping * score_old[v] / numNodes }
+			#pragma omp parallel for reduction(+:score_new[i])
 			for(int v=0; v<numNodes; v++) {
 				if (!outgoing_size(g, v)) {
 					score_new[i] += damping * solution[v] / (double)numNodes;
@@ -60,7 +61,6 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 		converged = (global_diff < convergence);
 	}
 	free(score_new);
-	free(diff);
 	/*
 	For PP students: Implement the page rank algorithm here.  You
 	are expected to parallelize the algorithm using openMP.  Your
