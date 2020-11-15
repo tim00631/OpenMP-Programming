@@ -18,6 +18,7 @@
 void pageRank(Graph g, double *solution, double damping, double convergence)
 {
 
+	omp_set_num_threads(omp_get_max_threads());
 	// initialize vertex weights to uniform probability. Double
 	// precision scores are used to avoid underflow for large graphs
 	int numNodes = num_nodes(g);
