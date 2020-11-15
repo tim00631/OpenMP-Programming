@@ -42,8 +42,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 			const Vertex* start = incoming_begin(g, i);
 			const Vertex* end = incoming_end(g, i);
 			// 	score_new[vi] = sum over all nodes vj reachable from incoming edges
-			//  					{ score_old[vj] / number of edges leaving vj  }
-			
+			//  					{ score_old[vj] / number of edges leaving vj  }		
 			for (const Vertex* j=start; j!=end; j++) {
 				int j_outdegree = outgoing_size(g, *j);
 				if(j_outdegree) {
@@ -67,6 +66,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 		}
 		converged = (global_diff < convergence);
 	}
+	printf("score_new[0]:%lf\n",score_new[0]);
 	free(score_new);
 	/*
 	For PP students: Implement the page rank algorithm here.  You
