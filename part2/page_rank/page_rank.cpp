@@ -20,7 +20,6 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 
 	// initialize vertex weights to uniform probability. Double
 	// precision scores are used to avoid underflow for large graphs
-
 	int numNodes = num_nodes(g);
 	double equal_prob = 1.0 / numNodes;
 	// #pragma omp parallel for
@@ -33,36 +32,6 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 
 	bool converged = false;
 	while (!converged) {
-		// double sum = 0;
-		// double node_constant = 0;
-		// // #pragma omp parallel for reduction(+:global_diff)
-		// // compute score_new[vi] for all nodes vi:
-		// for (int i=0; i<numNodes; i++) {
-		// 	int out_degree_i = outgoing_size(g, i);
-		// 	if(!out_degree_i) {
-		// 		node_constant = solution[i] / out_degree_i;
-		// 		const Vertex* start = outgoing_begin(g, i);
-		// 		const Vertex* end = outgoing_end(g, i);
-		// 		// 	score_new[vi] = sum over all nodes vj reachable from incoming edges
-		// 		//  					{ score_old[vj] / number of edges leaving vj  }
-		// 		for (const Vertex* j=start; j!=end; j++) {
-		// 			score_new[*j] = score_new[*j] + node_constant;
-		// 		}
-		// 	}
-		// 	else {
-		// 		sum += solution[i]/numNodes;
-		// 	}
-		// }
-
-		// double global_diff = 0.0;
-		// for (int i=0; i<numNodes;i++) {
-		// 	score_new[i] = damping * (score_new[i] + sum) + (1-damping) / numNodes;
-		// 	diff[i] = abs(score_new[i] - solution[i]);
-		// 	global_diff += diff[i];
-		// 	solution[i] = score_new[i];
-		// 	score_new[i] = 0;
-		// }
-		// converged = (global_diff < convergence);
 		double global_diff = 0.0;
 		for (int i=0;i<numNodes;i++){
 			const Vertex* start = incoming_begin(g, i);
@@ -84,8 +53,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 					score_new[i] += damping * solution[v] / numNodes;
 				}
 			}
-			diff[i] = abs(score_new[i] - solution[i]);
-			global_diff += diff[i];
+			global += abs(score_new[i] - solution[i]);
 			solution[i] = score_new[i];
 			score_new[i] = 0;
 		}
