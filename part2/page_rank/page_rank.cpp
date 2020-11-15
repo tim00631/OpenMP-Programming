@@ -29,9 +29,9 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 	for (int i = 0; i < numNodes; ++i) {
 		solution[i] = equal_prob;
 	}
-
-	while (!convergence) {
-		double global_diff = 0.0;
+	double global_diff = 0.0;
+	while (global_diff > convergence) {
+		global_diff = 0.0;
 		// #pragma omp parallel for reduction(+:global_diff)
 		for (int i=0; i<num_nodes(g); i++) {
 		// Vertex is typedef'ed to an int. Vertex* points into g.outgoing_edges[]
@@ -59,12 +59,9 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 			solution[i] = score_new[i];
 			score_new[i] = 0;
 		}
-		if (global_diff < convergence) {
-			free(score_new);
-			free(diff);
-			break;
-		}
 	}
+	free(score_new);
+	free(diff);
 	/*
 	For PP students: Implement the page rank algorithm here.  You
 	are expected to parallelize the algorithm using openMP.  Your
