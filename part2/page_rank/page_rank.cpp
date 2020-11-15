@@ -72,6 +72,9 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 		}
 		converged = (global_diff < convergence);
 	}
+	for (int i = 0; i < numNodes; ++i) {
+		solution[i] = score_new[i];
+	}
 	free(score_new);
 	/*
 	For PP students: Implement the page rank algorithm here.  You
