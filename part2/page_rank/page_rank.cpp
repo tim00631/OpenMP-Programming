@@ -22,12 +22,14 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 	// precision scores are used to avoid underflow for large graphs
 	int numNodes = num_nodes(g);
 	double equal_prob = 1.0 / numNodes;
+	double *score_new = (double *)malloc(sizeof(double) * numNodes);
+	double *score_old = (double *)malloc(sizeof(double) * numNodes);
 	#pragma omp parallel for
 	for (int i = 0; i < numNodes; ++i) {
-		solution[i] = equal_prob;
+		// solution[i] = equal_prob;
+		score_old[i] = equal_prob;
 	}
 
-	double *score_new = (double *)malloc(sizeof(double) * numNodes);
 
 	bool converged = false;
 	while (!converged) {
@@ -42,7 +44,8 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 			for (const Vertex* j=start; j!=end; j++) {
 				int j_outdegree = outgoing_size(g, *j);
 				if(j_outdegree) {
-					score_new[i] += solution[*j] / j_outdegree;
+					// score_new[i] += solution[*j] / j_outdegree;
+					score_new[i] += score_old[*j] / j_outdegree;
 				}
 			}
 			// score_new[vi] = (damping * score_new[vi]) + (1.0-damping) / numNodes;
@@ -52,19 +55,25 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 			// #pragma omp parallel for reduction(+:score_new[i])
 			for(int v=0; v<numNodes; v++) {
 				if (!outgoing_size(g, v)&& v!= i) {
-					score_new[i] += damping * solution[v] / numNodes;
+					// score_new[i] += damping * solution[v] / numNodes;
+					score_new[i] += damping * score_old[v] / numNodes;
 				}
 			}
 		}
 		// #pragma omp parallel for reduction(+:global_diff)
 		for (int i=0; i<numNodes;i++) {
-			global_diff += fabs(score_new[i] - solution[i]);
-			solution[i] = score_new[i];
+			global_diff += fabs(score_new[i] - score_old[i]);
+			score_old[i] = score_new[i];
 			score_new[i] = 0;
+			// global_diff += fabs(score_new[i] - solution[i]);
+			// solution[i] = score_new[i];
+			// score_new[i] = 0;
 		}
 		converged = (global_diff < convergence);
 	}
-	// free(score_new);
+	memcpy(solution,score_old,sizeof(double)*numNodes);
+	free(score_new);
+	free(score_old);
 	/*
 	For PP students: Implement the page rank algorithm here.  You
 	are expected to parallelize the algorithm using openMP.  Your
