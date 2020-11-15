@@ -39,7 +39,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 		// compute score_new[vi] for all nodes vi:
 		for (int i=0; i<numNodes; i++) {
 			int out_degree_i = outgoing_size(g, i);
-			if(!out_degree_i {
+			if(!out_degree_i) {
 				node_constant = solution[i] / out_degree_i;
 				const Vertex* start = outgoing_begin(g, i);
 				const Vertex* end = outgoing_end(g, i);
@@ -53,6 +53,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 				sum += solution[i]/numNodes;
 			}
 		}
+
 		double global_diff = 0.0;
 		for (int i=0; i<numNodes;i++) {
 			score_new[i] = damping * (score_new[i] + sum) + (1-damping) / numNodes;
