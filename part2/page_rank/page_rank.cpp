@@ -31,8 +31,8 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 	double *score_new = (double *)malloc(sizeof(double) * numNodes);
 	double *diff = (double *)malloc(sizeof(double) * numNodes);
 
-	bool converge = false;
-	while (!converge) {
+	bool converged = false;
+	while (!converged) {
 		double global_diff = 0.0;
 		// #pragma omp parallel for reduction(+:global_diff)
 		// compute score_new[vi] for all nodes vi:
