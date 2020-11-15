@@ -58,7 +58,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 				}
 			}
 		}
-		#pragma omp parallel for
+		// #pragma omp parallel for
 		for (int i=0;i<numNodes;i++){
 			// score_new[vi] = (damping * score_new[vi]) + (1.0-damping) / numNodes;
 			score_new[i] = (damping * score_new[i]) + (1.0-damping)/ numNodes;
