@@ -50,7 +50,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 			// score_new[vi] += sum over all nodes v in graph with no outgoing edges
 			// 						{ damping * score_old[v] / numNodes }
 			for(int v=0; v<num_nodes(g); v++){
-				if (!outgoing_size(v)) {
+				if (!outgoing_size(g, v)) {
 					score_new[i] += damping * solution[v] / numNodes;
 				}
 			}
