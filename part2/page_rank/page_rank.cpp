@@ -33,13 +33,13 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 	}
 	bool converged = false;
 	while (!converged) {
-		#pragma omp parallel for
+		// #pragma omp parallel for
 		for (int i = 0; i < numNodes; ++i) {
 			solution[i] = score_new[i];
 			score_new[i] = 0;
 		}
 		double sum = 0.0;	
-		#pragma omp parallel for reduction(+:sum)	
+		// #pragma omp parallel for reduction(+:sum)	
 		for(int v=0; v<numNodes; v++) {
 				if (!outgoing_size(g, v)) {
 					sum += damping * solution[v] / numNodes;
@@ -68,7 +68,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 		}
 		double global_diff = 0.0;
 		// printf("score_new[0]:%.17lf\n",score_new[0]);
-		#pragma omp parallel for reduction(+:global_diff)
+		// #pragma omp parallel for reduction(+:global_diff)
 		for (int i=0; i<numNodes;i++) {
 			global_diff += fabs(score_new[i] - solution[i]);
 			// solution[i] = score_new[i];
