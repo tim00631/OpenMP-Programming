@@ -34,7 +34,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 	while (!converged) {
 		for (int i = 0; i < numNodes; ++i) {
 			solution[i] = score_new[i];
-			// score_new[i] = 0;
+			score_new[i] = 0;
 		}
 		double sum = 0.0;		
 		for(int v=0; v<numNodes; v++) {
