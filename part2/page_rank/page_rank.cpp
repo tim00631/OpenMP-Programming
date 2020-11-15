@@ -23,18 +23,20 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 
 	int numNodes = num_nodes(g);
 	double equal_prob = 1.0 / numNodes;
-	double *score_new = (double *)malloc(sizeof(double) * numNodes);
-	double *diff = (double *)malloc(sizeof(double) * numNodes);
 	// #pragma omp parallel for
 	for (int i = 0; i < numNodes; ++i) {
 		solution[i] = equal_prob;
 	}
-	double global_diff = 1;
-	while (global_diff > convergence) {
-		global_diff = 0.0;
+
+	double *score_new = (double *)malloc(sizeof(double) * numNodes);
+	double *diff = (double *)malloc(sizeof(double) * numNodes);
+
+	bool converge = false;
+	while (!converge) {
+		double global_diff = 0.0;
 		// #pragma omp parallel for reduction(+:global_diff)
 		// compute score_new[vi] for all nodes vi:
-		for (int i=0; i<num_nodes(g); i++) {
+		for (int i=0; i<numNodes; i++) {
 		// Vertex is typedef'ed to an int. Vertex* points into g.outgoing_edges[]
 			const Vertex* start = incoming_begin(g, i);
 			const Vertex* end = incoming_end(g, i);
@@ -50,7 +52,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 			score_new[i] = (damping * score_new[i]) + (1.0-damping)/ numNodes;
 			// score_new[vi] += sum over all nodes v in graph with no outgoing edges
 			// 						{ damping * score_old[v] / numNodes }
-			for(int v=0; v<num_nodes(g); v++){
+			for(int v=0; v<numNodes; v++){
 				if (!outgoing_size(g, v)) {
 					score_new[i] += damping * solution[v] / numNodes;
 				}
@@ -60,6 +62,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 			solution[i] = score_new[i];
 			score_new[i] = 0;
 		}
+		converged = (global_diff < convergence)
 	}
 	free(score_new);
 	free(diff);
