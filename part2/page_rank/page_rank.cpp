@@ -62,7 +62,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 			solution[i] = score_new[i];
 			score_new[i] = 0;
 		}
-
+		converged = (global_diff < convergence);
 		// Vertex is typedef'ed to an int. Vertex* points into g.outgoing_edges[]
 		// 	const Vertex* start = incoming_begin(g, i);
 		// 	const Vertex* end = incoming_end(g, i);
