@@ -50,12 +50,13 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 					score_new[i] += solution[*j] / j_outdegree;
 				}
 			}
+		}
+		for (int i=0;i<numNodes;i++){
 			// score_new[vi] = (damping * score_new[vi]) + (1.0-damping) / numNodes;
 			score_new[i] = (damping * score_new[i]) + (1.0-damping)/ numNodes;
-			score_new[i] += sum;
 			// score_new[vi] += sum over all nodes v in graph with no outgoing edges
 			// 						{ damping * score_old[v] / numNodes }
-			// #pragma omp parallel for reduction(+:score_new[i])
+			score_new[i] += sum;
 		}
 		// #pragma omp parallel for reduction(+:global_diff)
 		double global_diff = 0.0;
