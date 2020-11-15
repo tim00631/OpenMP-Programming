@@ -59,6 +59,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 		}
 		// #pragma omp parallel for reduction(+:global_diff)
 		double global_diff = 0.0;
+		printf("score_new[0]:%lf\n",score_new[0]);
 		for (int i=0; i<numNodes;i++) {
 			global_diff += fabs(score_new[i] - solution[i]);
 			solution[i] = score_new[i];
@@ -66,7 +67,6 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 		}
 		converged = (global_diff < convergence);
 	}
-	printf("score_new[0]:%lf\n",score_new[0]);
 	free(score_new);
 	/*
 	For PP students: Implement the page rank algorithm here.  You
