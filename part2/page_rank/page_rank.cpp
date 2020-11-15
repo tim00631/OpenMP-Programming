@@ -62,7 +62,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 			solution[i] = score_new[i];
 			score_new[i] = 0;
 		}
-		converged = (global_diff < convergence);
+		converged = (global_diff < convergence/10);
 	}
 	free(score_new);
 	/*
