@@ -35,8 +35,8 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 		#pragma omp parallel for reduction(+:global_diff)
 		for (int i=0; i<num_nodes(g); i++) {
 		// Vertex is typedef'ed to an int. Vertex* points into g.outgoing_edges[]
-			Vertex* start = incoming_begin(g, i);
-			Vertex* end = incoming_end(g, i);
+			const Vertex* start = incoming_begin(g, i);
+			const Vertex* end = incoming_end(g, i);
 			int j_outDegree = outgoing_size(g, i);
 			if (!j_outDegree) {
 				for (Vertex* j = start; j != end; j++) {
