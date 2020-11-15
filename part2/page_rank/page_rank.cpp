@@ -55,6 +55,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 				}
 			}
 		}
+		#pragma omp parallel for reduction(+:global_diff)
 		for (int i=0; i<numNodes;i++) {
 			global_diff += abs(score_new[i] - solution[i]);
 			solution[i] = score_new[i];
