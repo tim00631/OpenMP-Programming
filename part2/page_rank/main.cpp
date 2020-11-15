@@ -130,7 +130,7 @@ int main(int argc, char** argv) {
             reference_pageRank(g, sol4, PageRankDampening, PageRankConvergence);
             ref_pagerank_time = CycleTimer::currentSeconds() - start;
 
-	    // record single thread times in order to report speedup
+	        // record single thread times in order to report speedup
             if (num_threads[i] == 1) {
                 pagerank_base = pagerank_time;
                 ref_pagerank_base = ref_pagerank_time;
