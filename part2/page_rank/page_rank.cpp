@@ -40,7 +40,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 			// 	score_new[vi] = sum over all nodes vj reachable from incoming edges
 			//  					{ score_old[vj] / number of edges leaving vj  }
 			for (const Vertex* j=start; j!=end; j++) {
-				int j_outDegree = outgoing_size(g, j);
+				int j_outDegree = outgoing_size(g, *j);
 				if(j_outDegree) {
 					score_new[i] += solution[*j] / j_outDegree;
 				}
@@ -49,7 +49,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 			score_new[i] = (damping * score_new[i]) + (1.0-damping)/ numNodes;
 			// score_new[vi] += sum over all nodes v in graph with no outgoing edges
 			// 						{ damping * score_old[v] / numNodes }
-			for(int v=0; v<numNodes(g); v++){
+			for(int v=0; v<num_nodes(g); v++){
 				if (!outgoing_size(v)) {
 					score_new[i] += damping * solution[v] / numNodes;
 				}
