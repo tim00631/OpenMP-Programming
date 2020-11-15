@@ -54,11 +54,16 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 					score_new[i] += damping * solution[v] / (double)numNodes;
 				}
 			}
+		}
+		for (int i=0; i<numNodes;i++){
 			global_diff += abs(score_new[i] - solution[i]);
-			solution[i] = score_new[i];
-			score_new[i] = 0;
 		}
 		converged = (global_diff < convergence);
+		if(!converged) {
+			for (int i=0; i<numNodes;i++){
+				solution[i] = score_new[i];
+				score_new[i] = 0;
+		}
 	}
 	free(score_new);
 	/*
