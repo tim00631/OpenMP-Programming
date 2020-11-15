@@ -53,7 +53,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 					score_new[i] += damping * solution[v] / numNodes;
 				}
 			}
-			global += abs(score_new[i] - solution[i]);
+			global_diff += abs(score_new[i] - solution[i]);
 			solution[i] = score_new[i];
 			score_new[i] = 0;
 		}
