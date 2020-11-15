@@ -22,7 +22,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 	// precision scores are used to avoid underflow for large graphs
 	int numNodes = num_nodes(g);
 	double equal_prob = 1.0 / numNodes;
-	// #pragma omp parallel for
+	#pragma omp parallel for
 	for (int i = 0; i < numNodes; ++i) {
 		solution[i] = equal_prob;
 	}
@@ -51,7 +51,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 			// 						{ damping * score_old[v] / numNodes }
 			// #pragma omp parallel for reduction(+:score_new[i])
 			for(int v=0; v<numNodes; v++) {
-				if (!outgoing_size(g, v)) {
+				if (!outgoing_size(g, v)&& v!= i) {
 					score_new[i] += damping * solution[v] / numNodes;
 				}
 			}
@@ -64,7 +64,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 		}
 		converged = (global_diff < convergence);
 	}
-	free(score_new);
+	// free(score_new);
 	/*
 	For PP students: Implement the page rank algorithm here.  You
 	are expected to parallelize the algorithm using openMP.  Your
