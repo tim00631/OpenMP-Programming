@@ -65,7 +65,6 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 		converged = (global_diff < convergence);
 	}
 	free(score_new);
-	free_graph(g);
 	/*
 	For PP students: Implement the page rank algorithm here.  You
 	are expected to parallelize the algorithm using openMP.  Your
