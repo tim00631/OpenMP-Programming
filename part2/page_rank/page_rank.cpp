@@ -37,7 +37,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 			const Vertex* end = incoming_end(g, i);
 			// 	score_new[vi] = sum over all nodes vj reachable from incoming edges
 			//  					{ score_old[vj] / number of edges leaving vj  }
-			#pragma omp parallel for reduction(+:score_new[i])
+			
 			for (const Vertex* j=start; j!=end; j++) {
 				int j_outdegree = outgoing_size(g, *j);
 				if(j_outdegree) {
@@ -48,7 +48,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 			score_new[i] = (damping * score_new[i]) + (1.0-damping)/ (double)numNodes;
 			// score_new[vi] += sum over all nodes v in graph with no outgoing edges
 			// 						{ damping * score_old[v] / numNodes }
-			#pragma omp parallel for reduction(+:score_new[i])
+			// #pragma omp parallel for reduction(+:score_new[i])
 			for(int v=0; v<numNodes; v++) {
 				if (!outgoing_size(g, v)) {
 					score_new[i] += damping * solution[v] / (double)numNodes;
