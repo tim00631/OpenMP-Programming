@@ -33,6 +33,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 	while (!converged) {
 		double global_diff = 0.0;
 		for (int i=0;i<numNodes;i++){
+			bool update = false;
 			const Vertex* start = incoming_begin(g, i);
 			const Vertex* end = incoming_end(g, i);
 			// 	score_new[vi] = sum over all nodes vj reachable from incoming edges
@@ -57,7 +58,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 		}
 		#pragma omp parallel for reduction(+:global_diff)
 		for (int i=0; i<numNodes;i++) {
-			global_diff += abs(score_new[i] - solution[i]);
+			global_diff += fabs(score_new[i] - solution[i]);
 			solution[i] = score_new[i];
 			score_new[i] = 0;
 		}
