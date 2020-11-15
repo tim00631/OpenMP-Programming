@@ -46,7 +46,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 				// 	score_new[vi] = sum over all nodes vj reachable from incoming edges
 				//  					{ score_old[vj] / number of edges leaving vj  }
 				for (const Vertex* j=start; j!=end; j++) {
-					score_new[j] = score_new[j] + node_constant;
+					score_new[*j] = score_new[*j] + node_constant;
 				}
 			}
 			else {
