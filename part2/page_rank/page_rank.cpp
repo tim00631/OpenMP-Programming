@@ -37,7 +37,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 		// Vertex is typedef'ed to an int. Vertex* points into g.outgoing_edges[]
 			Vertex* start = incoming_begin(g, i);
 			Vertex* end = incoming_end(g, i);
-			int j_outDegree = outgoing_size(g,i);
+			int j_outDegree = outgoing_size(g, i);
 			if (!j_outDegree) {
 				for (Vertex* j = start; j != end; j++) {
 					score_new[i] += solution[j] / j_outDegree;
