@@ -21,7 +21,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 	// initialize vertex weights to uniform probability. Double
 	// precision scores are used to avoid underflow for large graphs
 	int numNodes = num_nodes(g);
-	double equal_prob = 1.0 / numNodes;
+	double equal_prob = 1.0 / (double)numNodes;
 	// #pragma omp parallel for
 	for (int i = 0; i < numNodes; ++i) {
 		solution[i] = equal_prob;
@@ -41,16 +41,16 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 			for (const Vertex* j=start; j!=end; j++) {
 				int j_outDegree = outgoing_size(g, *j);
 				if(j_outDegree) {
-					score_new[i] += solution[*j] / j_outDegree;
+					score_new[i] += solution[*j] / (double)j_outDegree;
 				}
 			}
-			score_new[i] = (damping * score_new[i]) + (1.0-damping)/ numNodes;
+			score_new[i] = (damping * score_new[i]) + (1.0-damping)/ (double)numNodes;
 			// score_new[vi] = (damping * score_new[vi]) + (1.0-damping) / numNodes;
 			// score_new[vi] += sum over all nodes v in graph with no outgoing edges
 			// 						{ damping * score_old[v] / numNodes }
 			for(int v=0; v<numNodes; v++) {
 				if (!outgoing_size(g, v)) {
-					score_new[i] += damping * solution[v] / numNodes;
+					score_new[i] += damping * solution[v] / (double)numNodes;
 				}
 			}
 			global_diff += abs(score_new[i] - solution[i]);
