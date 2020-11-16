@@ -53,7 +53,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 			// 	score_new[vi] = sum over all nodes vj reachable from incoming edges
 			//  					{ score_old[vj] / number of edges leaving vj  }	
 			double inherit = 0.0;
-			#pragma omp parallel for reduction(+:inherit)
+			#pragma omp for reduction(+:inherit)
 			for (int j=start; j!=end; j++) {
 				Vertex node_j = g->incoming_edges[j]; // get node_j from edge array
 				int j_outdegree = outgoing_size(g, node_j); //get j's out degrees
