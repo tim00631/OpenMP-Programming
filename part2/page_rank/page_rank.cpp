@@ -49,7 +49,7 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 			// const Vertex* start = incoming_begin(g, i);
 			// const Vertex* end = incoming_end(g, i);
 			int start = g->incoming_starts(i);
-			int end = g->incoming_starts+ incoming_size(g,i);
+			int end = start + incoming_size(g,i);
 			// 	score_new[vi] = sum over all nodes vj reachable from incoming edges
 			//  					{ score_old[vj] / number of edges leaving vj  }	
 			double inherit = 0.0;
