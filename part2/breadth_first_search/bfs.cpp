@@ -175,7 +175,7 @@ void bfs_bottom_up(Graph graph, solution *sol)
 #ifdef VERBOSE
         double start_time = CycleTimer::currentSeconds();
 #endif
-        buttom_up_step(graph, frontier, sol->distances, iteration);
+        bottom_up_step(graph, frontier, sol->distances, iteration);
 
 #ifdef VERBOSE
         double end_time = CycleTimer::currentSeconds();
