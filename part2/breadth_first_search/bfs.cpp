@@ -127,7 +127,7 @@ void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration
     {
         #pragma omp for reduction(+:local_count)
         for (int i = 0; i < g->num_nodes; i++){
-            if (frontier->vertices[i] == NOT_VISITED_MARKER) {
+            if (frontier->vertices[i] == 0) {
 
                 int start_edge = g->incoming_starts[i];
                 int end_edge = (i == g->num_nodes-1) ? g->num_edges : g->incoming_starts[i + 1];
