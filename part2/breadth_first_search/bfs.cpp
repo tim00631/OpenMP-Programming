@@ -54,7 +54,7 @@ void top_down_step(
                 int neighbor_id = g->outgoing_edges[neighbor]; // get nodeId from edge array
 
                 if (__sync_bool_compare_and_swap(&distances[neighbor_id], NOT_VISITED_MARKER, distances[node] + 1)) {
-                    local_frontier[local_count] = outgoing;
+                    local_frontier[local_count] = neighbor_id;
                     local_count++;
                 }
                 // if (distances[outgoing] == NOT_VISITED_MARKER) // if not visited, enqueue this neighbor
@@ -137,7 +137,7 @@ void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration
                     if(frontier->vertices[neighbor_id] == iteration) {
                         distances[i] = distances[neighbor_id] + 1;
                         local_count++;
-                        frontier->present[i] = iteration + 1;
+                        frontier->vertices[i] = iteration + 1;
                         break;
                     }
                 }
