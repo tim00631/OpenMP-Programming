@@ -12,6 +12,8 @@
 #define ROOT_NODE_ID 0
 #define NOT_VISITED_MARKER -1
 #define THRESHOLD 100000
+
+
 void vertex_set_clear(vertex_set *list)
 {
     list->count = 0;
@@ -44,7 +46,7 @@ void top_down_step(
                 int start_edge = g->outgoing_starts[i];
                 int end_edge = (i == g->num_nodes-1) ? g->num_edges : g->outgoing_starts[i+1];
 
-                for (int neighbor = start_edge; neighbor < end_edge ; neighbor++) {
+                for (int neighbor = start_edge; neighbor < end_edge; neighbor++) {
                     int neighbor_id = g->outgoing_edges[neighbor];
                     if(frontier->vertices[neighbor_id] == 0) {
                         distances[neighbor_id] = distances[i] + 1;
@@ -87,7 +89,7 @@ void bfs_top_down(Graph graph, solution *sol)
         double end_time = CycleTimer::currentSeconds();
         printf("frontier=%-10d %.4f sec\n", frontier->count, end_time - start_time);
 #endif
-        iteration ++;
+        iteration++;
     }
 }
 
@@ -173,16 +175,19 @@ void bfs_hybrid(Graph graph, solution *sol)
     vertex_set list1;
     vertex_set_init(&list1, graph->num_nodes);
     vertex_set* frontier = &list1;    
+
+
     int iteration = 1;
 
-    /// setup frontier & solution with root
+    /// setup frontier with root
     memset(frontier->vertices, 0, sizeof(int) * graph->num_nodes);
-    sol->distances[ROOT_NODE_ID] = 0;
 
     frontier->vertices[frontier->count++] = 1;
 
+    sol->distances[ROOT_NODE_ID] = 0;
+
     // set the root distance with 0
-    
+    sol->distances[ROOT_NODE_ID] = 0;
     
     while (frontier->count != 0) {
         
