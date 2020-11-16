@@ -34,39 +34,42 @@ void top_down_step(
     int *distances)
 {
     // int num_threads = 4;
-    int local_count = 0;
-    int* local_frontier = (int* )malloc(sizeof(int) * g->num_nodes);
-    #pragma omp parallel for private(local_count)
-    for (int i = 0; i < frontier->count; i++)
+    #pragma omp parallel
     {
-        int node = frontier->vertices[i];
-
-        int start_edge = g->outgoing_starts[node]; // edge array start
-        int end_edge = (node == g->num_nodes - 1) // edge array end
-                           ? g->num_edges
-                           : g->outgoing_starts[node + 1];
-
-        // attempt to add all neighbors to the new frontier
-        for (int neighbor = start_edge; neighbor < end_edge; neighbor++)
+        int local_count = 0;
+        int* local_frontier = (int*) malloc(sizeof(int) * g->num_nodes);
+        #pragma omp for 
+        for (int i = 0; i < frontier->count; i++)
         {
-            int outgoing = g->outgoing_edges[neighbor]; // get nodeId from edge array
+            int node = frontier->vertices[i];
 
-            if(__sync_bool_compare_and_swap(&distances[outgoing], NOT_VISITED_MARKER, distances[node] + 1)){
-                local_frontier[local_count] = outgoing;
-                local_count++;
+            int start_edge = g->outgoing_starts[node]; // edge array start
+            int end_edge = (node == g->num_nodes - 1) // edge array end
+                            ? g->num_edges
+                            : g->outgoing_starts[node + 1];
+
+            // attempt to add all neighbors to the new frontier
+            for (int neighbor = start_edge; neighbor < end_edge; neighbor++)
+            {
+                int outgoing = g->outgoing_edges[neighbor]; // get nodeId from edge array
+
+                if (__sync_bool_compare_and_swap(&distances[outgoing], NOT_VISITED_MARKER, distances[node] + 1)) {
+                    local_frontier[local_count] = outgoing;
+                    local_count++;
+                }
+                // if (distances[outgoing] == NOT_VISITED_MARKER) // if not visited, enqueue this neighbor
+                // {
+                //     distances[outgoing] = distances[node] + 1;
+                //     int index = new_frontier->count++;
+                //     new_frontier->vertices[index] = outgoing;
+                // }
             }
-            // if (distances[outgoing] == NOT_VISITED_MARKER) // if not visited, enqueue this neighbor
-            // {
-            //     distances[outgoing] = distances[node] + 1;
-            //     int index = new_frontier->count++;
-            //     new_frontier->vertices[index] = outgoing;
-            // }
         }
-    }
-    #pragma omp critical
-    {
-        memcpy(new_frontier->vertices + new_frontier->count, local_frontier, sizeof(int) * local_count);
-        new_frontier->count += local_count;
+        #pragma omp critical
+        {
+            memcpy(new_frontier->vertices + new_frontier->count, local_frontier, sizeof(int) * local_count);
+            new_frontier->count += local_count;
+        }
     }
 }
 
