@@ -65,7 +65,7 @@ void top_down_step(
     }
     #pragma omp critical
     {
-        memcpy(new_frontier->vertices + new_frontier->count, local_frontier, sizeof(int) * local_count)
+        memcpy(new_frontier->vertices + new_frontier->count, local_frontier, sizeof(int) * local_count);
         new_frontier->count += local_count;
     }
 }
