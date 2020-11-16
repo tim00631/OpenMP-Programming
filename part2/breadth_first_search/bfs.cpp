@@ -81,8 +81,6 @@ void bfs_top_down(Graph graph, solution *sol)
 #ifdef VERBOSE
         double start_time = CycleTimer::currentSeconds();
 #endif
-        vertex_set_clear(new_frontier);
-
         top_down_step(graph, frontier, sol->distances, iteration);
 
 #ifdef VERBOSE
