@@ -45,13 +45,13 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 				sum += damping * solution[v] / numNodes;
 			}
 		}
-		#pragma omp parallel for collapse(2) private(inherit)
 		for (int i=0;i<numNodes;i++){
 			const Vertex* start = incoming_begin(g, i);
 			const Vertex* end = incoming_end(g, i);
 			// 	score_new[vi] = sum over all nodes vj reachable from incoming edges
 			//  					{ score_old[vj] / number of edges leaving vj  }	
 			double inherit = 0.0;
+			#pragma omp parallel for private(start,end) reduction(+:inherit)
 			for (const Vertex* j=start; j!=end; j++) {
 				int j_outdegree = outgoing_size(g, *j);
 				if(j_outdegree) {
