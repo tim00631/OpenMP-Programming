@@ -46,16 +46,19 @@ void pageRank(Graph g, double *solution, double damping, double convergence)
 			}
 		}
 		for (int i=0;i<numNodes;i++){
-			const Vertex* start = incoming_begin(g, i);
-			const Vertex* end = incoming_end(g, i);
+			// const Vertex* start = incoming_begin(g, i);
+			// const Vertex* end = incoming_end(g, i);
+			int start = g->incoming_starts(i);
+			int end = g->incoming_starts+ incoming_size(g,i);
 			// 	score_new[vi] = sum over all nodes vj reachable from incoming edges
 			//  					{ score_old[vj] / number of edges leaving vj  }	
 			double inherit = 0.0;
-			// #pragma omp parallel for reduction(+:inherit)
-			for (const Vertex* j=start; j!=end; j++) {
-				int j_outdegree = outgoing_size(g, *j);
+			#pragma omp parallel for reduction(+:inherit)
+			for (int j=start; j!=end; j++) {
+				Vertex node_j = g->incoming_edges(j); // get node_j from edge array
+				int j_outdegree = outgoing_size(g, node_j); //get j's out degrees
 				if(j_outdegree) {
-					inherit += solution[*j] / j_outdegree;
+					inherit += solution[node_j] / j_outdegree;
 				}
 			}
 			score_new[i] += inherit;
