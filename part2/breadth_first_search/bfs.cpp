@@ -144,6 +144,7 @@ void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration
             }
         }
     }
+    frontier->count = local_count;
 }
 
 void bfs_bottom_up(Graph graph, solution *sol)
@@ -163,8 +164,9 @@ void bfs_bottom_up(Graph graph, solution *sol)
     vertex_set list1;
     
     vertex_set_init(&list1, graph->num_nodes);
-    int iteration = 1;
     vertex_set* frontier = &list1;
+
+    int iteration = 1;
 
     // setup frontier & solution with root
     frontier->vertices[frontier->count++] = 1; 
