@@ -38,7 +38,7 @@ void top_down_step(
     {
         int local_count = 0;
         int* local_frontier = (int*) malloc(sizeof(int) * g->num_nodes);
-        #pragma omp for collapse(2)
+        #pragma omp for
         for (int i = 0; i < frontier->count; i++)
         {
             int node = frontier->vertices[i];
@@ -49,7 +49,7 @@ void top_down_step(
                             : g->outgoing_starts[node + 1];
 
             // attempt to add all neighbors to the new frontier
-            
+            #pragma omp for
             for (int neighbor = start_edge; neighbor < end_edge; neighbor++)
             {
                 int outgoing = g->outgoing_edges[neighbor]; // get nodeId from edge array
