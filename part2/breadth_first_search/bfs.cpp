@@ -33,9 +33,9 @@ void top_down_step(
     vertex_set *new_frontier,
     int *distances)
 {
-    int num_threads = 4;
+    // int num_threads = 4;
     int local_count = 0;
-    int* local_frontier = (int* )malloc(sizeof(int) * g->num_nodes/num_threads);
+    int* local_frontier = (int* )malloc(sizeof(int) * g->num_nodes);
     #pragma omp parallel for private(local_count)
     for (int i = 0; i < frontier->count; i++)
     {
