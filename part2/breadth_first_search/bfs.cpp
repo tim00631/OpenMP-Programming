@@ -120,6 +120,32 @@ void bfs_top_down(Graph graph, solution *sol)
     }
 }
 
+void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration)
+{
+    int local_count = 0;
+    #pragma omp parallel
+    {
+        #pragma omp for reduction(+:local_count)
+        for (int i = 0; i < g->num_nodes; i++){
+            if (frontier->vertices[i] == NOT_VISITED_MARKER) {
+
+                int start_edge = g->incoming_starts[i];
+                int end_edge = (i == g->num_nodes-1) ? g->num_edges : g->incoming_starts[i + 1];
+
+                for(int neighbor = start_edge; neighbor < end_edge; neighbor++) {
+                    int neighbor_id = g->incoming_edges[neighbor];
+                    if(frontier->vertices[neighbor_id] == iteration) {
+                        distances[i] = distances[neighbor_id] + 1;
+                        local_count++;
+                        frontier->present[i] = iteration + 1;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
 void bfs_bottom_up(Graph graph, solution *sol)
 {
     // For PP students:
@@ -156,32 +182,6 @@ void bfs_bottom_up(Graph graph, solution *sol)
         printf("frontier=%-10d %.4f sec\n", frontier->count, end_time - start_time);
 #endif
         iteration++;
-    }
-}
-
-void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration)
-{
-    int local_count = 0;
-    #pragma omp parallel
-    {
-        #pragma omp for reduction(+:local_count)
-        for (int i = 0; i < g->num_nodes; i++){
-            if (frontier->vertices[i] == NOT_VISITED_MARKER) {
-
-                int start_edge = g->incoming_starts[i];
-                int end_edge = (i == g->num_nodes-1) ? g->num_edges : g->incoming_starts[i + 1];
-
-                for(int neighbor = start_edge; neighbor < end_edge; neighbor++) {
-                    int neighbor_id = g->incoming_edges[neighbor];
-                    if(frontier->vertices[neighbor_id] == iteration) {
-                        distances[i] = distances[neighbor_id] + 1;
-                        local_count++;
-                        frontier->present[i] = iteration + 1;
-                        break;
-                    }
-                }
-            }
-        }
     }
 }
 
