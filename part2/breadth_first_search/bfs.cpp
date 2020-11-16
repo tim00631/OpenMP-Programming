@@ -11,7 +11,7 @@
 
 #define ROOT_NODE_ID 0
 #define NOT_VISITED_MARKER -1
-
+#define THRESHOLD 100000
 void vertex_set_clear(vertex_set *list)
 {
     list->count = 0;
@@ -193,4 +193,34 @@ void bfs_hybrid(Graph graph, solution *sol)
     //
     // You will need to implement the "hybrid" BFS here as
     // described in the handout.
+
+    vertex_set list1;
+    vertex_set_init(&list1, graph->num_nodes);
+    vertex_set* frontier = &list1;    
+    int iteration = 1;
+
+    /// setup frontier & solution with root
+    memset(frontier->vertices, 0, sizeof(int) * graph->num_nodes);
+    sol->distances[ROOT_NODE_ID] = 0;
+
+    frontier->vertices[frontier->count++] = 1;
+
+    // set the root distance with 0
+    
+    
+    while (frontier->count != 0) {
+        
+        if(frontier->count >= THRESHOLD) {
+            frontier->count = 0;
+            bottom_up_step(graph, frontier, sol->distances, iteration);
+        }
+        else {
+            frontier->count = 0;
+            top_down_step(graph, frontier, sol->distances, iteration);
+        }
+
+        iteration++;
+
+
+    }     
 }
