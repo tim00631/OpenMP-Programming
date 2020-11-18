@@ -73,7 +73,7 @@ void bfs_top_down(Graph graph, solution *sol)
 
     int iteration = 1;
 
-    frontier->vertices[frontier->count++] = ROOT_NODE_ID;
+    frontier->vertices[frontier->count++] = 1;
     sol->distances[ROOT_NODE_ID] = 0;
 
     while (frontier->count != 0)
@@ -91,11 +91,11 @@ void bfs_top_down(Graph graph, solution *sol)
         iteration++;
     }
 
-    // #pragma omp parallel for
-    // for (int i=0; i<graph->num_nodes; i++) {
-    //     if(sol->distances[i] == 0 && i != ROOT_NODE_ID)
-    //         sol->distances[i] = -1; // this node is unreachable
-    // }
+    #pragma omp parallel for
+    for (int i=0; i<graph->num_nodes; i++) {
+        if(sol->distances[i] == 0 && i != ROOT_NODE_ID)
+            sol->distances[i] = -1; // this node is unreachable
+    }
 }
 
 void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration)
@@ -146,7 +146,7 @@ void bfs_bottom_up(Graph graph, solution *sol)
     int iteration = 1;
 
     // setup frontier & solution with root
-    frontier->vertices[frontier->count++] = ROOT_NODE_ID; 
+    frontier->vertices[frontier->count++] = 1; 
     
     #pragma omp parallel for
     for (int i=0; i<graph->num_nodes; i++) {
@@ -167,11 +167,11 @@ void bfs_bottom_up(Graph graph, solution *sol)
         iteration++;
     }
 
-    // #pragma omp parallel for
-    // for (int i=0; i<graph->num_nodes; i++) {
-    //     if(sol->distances[i] == 0 && i != ROOT_NODE_ID)
-    //         sol->distances[i] = -1; // this node is unreachable
-    // }
+    #pragma omp parallel for
+    for (int i=0; i<graph->num_nodes; i++) {
+        if(sol->distances[i] == 0 && i != ROOT_NODE_ID)
+            sol->distances[i] = -1; // this node is unreachable
+    }
 }
 
 void bfs_hybrid(Graph graph, solution *sol)
