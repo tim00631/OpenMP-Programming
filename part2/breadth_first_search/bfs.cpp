@@ -141,9 +141,9 @@ void bfs_bottom_up(Graph graph, solution *sol)
     // setup frontier & solution with root
     frontier->vertices[frontier->count++] = 1; 
     
-    // for (int i=0; i<graph->num_nodes; i++) {
-    //     sol->distances[i] = 0;
-    // }
+    for (int i=0; i<graph->num_nodes; i++) {
+        sol->distances[i] = 0;
+    }
 
     while(frontier->count != 0){
         frontier->count = 0;
@@ -157,6 +157,10 @@ void bfs_bottom_up(Graph graph, solution *sol)
         printf("frontier=%-10d %.4f sec\n", frontier->count, end_time - start_time);
 #endif
         iteration++;
+    }
+    for (int i=0; i<graph->num_nodes; i++) {
+        if(sol->distances[i] == 0)
+            sol->distances[i] = -1;
     }
 }
 
