@@ -10,9 +10,10 @@
 #include "../common/graph.h"
 
 #define ROOT_NODE_ID 0
-#define NOT_VISITED_MARKER -1
+// #define NOT_VISITED_MARKER -1
+#define NOT_VISITED_MARKER 0
 #define THRESHOLD 10000000
-// #define VERBOSE 1
+#define VERBOSE 1
 
 
 void vertex_set_clear(vertex_set *list)
@@ -43,7 +44,7 @@ void top_down_step(Graph g, vertex_set *frontier, int *distances, int iteration)
 
                 for (int neighbor = start_edge; neighbor < end_edge; neighbor++) {
                     int neighbor_id = g->outgoing_edges[neighbor];
-                    if(frontier->vertices[neighbor_id] == 0) {
+                    if(frontier->vertices[neighbor_id] == NOT_VISITED_MARKER) {
                         distances[neighbor_id] = distances[i] + 1;
                         local_count++;
                         frontier->vertices[neighbor_id] = iteration + 1;
@@ -65,6 +66,7 @@ void bfs_top_down(Graph graph, solution *sol)
     vertex_set list1;
     vertex_set_init(&list1, graph->num_nodes);
     vertex_set *frontier = &list1;
+    
     memset(frontier->vertices, 0, sizeof(int) * graph->num_nodes);
 
     int iteration = 1;
@@ -86,10 +88,11 @@ void bfs_top_down(Graph graph, solution *sol)
 #endif
         iteration++;
     }
-    
+
+    #pragma omp parallel for
     for (int i=0; i<graph->num_nodes; i++) {
         if(sol->distances[i] == 0 && i != ROOT_NODE_ID)
-            sol->distances[i] = -1;
+            sol->distances[i] = -1; // this node is unreachable
     }
 }
 
@@ -100,7 +103,7 @@ void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration
     {
         #pragma omp for reduction(+:local_count)
         for (int i = 0; i < g->num_nodes; i++){
-            if (frontier->vertices[i] == 0) {
+            if (frontier->vertices[i] == NOT_VISITED_MARKER) {
                 int start_edge = g->incoming_starts[i];
                 int end_edge = (i == g->num_nodes-1) ? g->num_edges : g->incoming_starts[i + 1];
                 for(int neighbor = start_edge; neighbor < end_edge; neighbor++) {
@@ -133,9 +136,7 @@ void bfs_bottom_up(Graph graph, solution *sol)
     // each step of the BFS process.
 
     vertex_set list1;
-    
     vertex_set_init(&list1, graph->num_nodes);
-
     vertex_set* frontier = &list1; 
 
     memset(frontier->vertices, 0, sizeof(int) * graph->num_nodes); 
@@ -145,6 +146,7 @@ void bfs_bottom_up(Graph graph, solution *sol)
     // setup frontier & solution with root
     frontier->vertices[frontier->count++] = 1; 
     
+    #pragma omp parallel for
     for (int i=0; i<graph->num_nodes; i++) {
         sol->distances[i] = 0;
     }
@@ -162,9 +164,11 @@ void bfs_bottom_up(Graph graph, solution *sol)
 #endif
         iteration++;
     }
+
+    #pragma omp parallel for
     for (int i=0; i<graph->num_nodes; i++) {
         if(sol->distances[i] == 0 && i != ROOT_NODE_ID)
-            sol->distances[i] = -1;
+            sol->distances[i] = -1; // this node is unreachable
     }
 }
 
