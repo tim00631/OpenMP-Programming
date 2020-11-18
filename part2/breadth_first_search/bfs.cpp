@@ -13,7 +13,7 @@
 // #define NOT_VISITED_MARKER -1
 #define NOT_VISITED_MARKER 0
 #define THRESHOLD 1000000
-#define VERBOSE 1
+// #define VERBOSE 1
 
 
 void vertex_set_clear(vertex_set *list)
