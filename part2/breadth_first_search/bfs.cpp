@@ -15,7 +15,7 @@
 #define THRESHOLD 500000
 #define ALPHA 14
 #define BETA 24
-// #define VERBOSE 1
+#define VERBOSE 1
 void vertex_set_clear(vertex_set *list)
 {
     list->count = 0;
@@ -90,8 +90,8 @@ void bfs_top_down(Graph graph, solution *sol)
     }
 
     #pragma omp parallel for
-    for (int i=0; i<graph->num_nodes; i++) {
-        if(sol->distances[i] == 0 && i != ROOT_NODE_ID)
+    for (int i=1; i<graph->num_nodes; i++) {
+        if(sol->distances[i] == 0)
             sol->distances[i] = -1; // this node is unreachable
     }
 }
@@ -153,21 +153,21 @@ void bfs_bottom_up(Graph graph, solution *sol)
 
     while(frontier->count != 0) {
         frontier->count = 0;
-#ifdef VERBOSE
-        double start_time = CycleTimer::currentSeconds();
-#endif
+// #ifdef VERBOSE
+//         double start_time = CycleTimer::currentSeconds();
+// #endif
         bottom_up_step(graph, frontier, sol->distances, iteration);
 
-#ifdef VERBOSE
-        double end_time = CycleTimer::currentSeconds();
-        printf("frontier=%-10d %.4f sec\n", frontier->count, end_time - start_time);
-#endif
+// #ifdef VERBOSE
+//         double end_time = CycleTimer::currentSeconds();
+//         printf("frontier=%-10d %.4f sec\n", frontier->count, end_time - start_time);
+// #endif
         iteration++;
     }
 
     #pragma omp parallel for
-    for (int i=0; i<graph->num_nodes; i++) {
-        if(sol->distances[i] == 0 && i != ROOT_NODE_ID)
+    for (int i=1; i<graph->num_nodes; i++) {
+        if(sol->distances[i] == 0)
             sol->distances[i] = -1; // this node is unreachable
     }
 }
@@ -198,6 +198,7 @@ void bfs_hybrid(Graph graph, solution *sol)
     
     while (frontier->count != 0) {
         int edges_in_frontier = 0;
+        #pragma omp parallel for reduction(+: edges_in_frontier)
         for (int i = 0; i < frontier->count; i++){
            edges_in_frontier += outgoing_size(graph,frontier->vertices[i]);
         }
