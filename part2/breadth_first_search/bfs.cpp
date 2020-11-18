@@ -87,6 +87,10 @@ void bfs_top_down(Graph graph, solution *sol)
         iteration++;
     }
     
+    for (int i=0; i<graph->num_nodes; i++) {
+        if(sol->distances[i] == 0 && i != ROOT_NODE_ID)
+            sol->distances[i] = -1;
+    }
 }
 
 void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration)
