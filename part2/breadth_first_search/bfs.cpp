@@ -199,7 +199,7 @@ void bfs_hybrid(Graph graph, solution *sol)
     while (frontier->count != 0) {
         int edges_in_frontier = 0;
         for (int i = 0; i < frontier->count; i++){
-           edges_in_frontier += outgoing_size(graph,frontier[i]);
+           edges_in_frontier += outgoing_size(graph,frontier->vertices[i]);
         }
 
         if (edges_in_frontier > edges_to_check / ALPHA || frontier->count >= num_nodes(graph)/BETA) {
