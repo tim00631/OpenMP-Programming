@@ -12,6 +12,7 @@
 #define ROOT_NODE_ID 0
 #define NOT_VISITED_MARKER -1
 #define THRESHOLD 10000000
+// #define VERBOSE 1
 
 
 void vertex_set_clear(vertex_set *list)
@@ -29,17 +30,11 @@ void vertex_set_init(vertex_set *list, int count)
 // Take one step of "top-down" BFS.  For each vertex on the frontier,
 // follow all outgoing edges, and add all neighboring vertices to the
 // new_frontier.
-void top_down_step(
-    Graph g,
-    vertex_set *frontier,
-    int *distances,
-    int iteration)
+void top_down_step(Graph g, vertex_set *frontier, int *distances, int iteration)
 {
     int local_count = 0;
     #pragma omp parallel
     {
-        // int local_count = 0;
-        // int* local_frontier = (int*) malloc(sizeof(int) * g->num_nodes);
         #pragma omp for reduction(+: local_count)
         for (int i = 0; i < g->num_nodes; i++) {
             if(frontier->vertices[i] == iteration) {
@@ -50,7 +45,7 @@ void top_down_step(
                     int neighbor_id = g->outgoing_edges[neighbor];
                     if(frontier->vertices[neighbor_id] == 0) {
                         distances[neighbor_id] = distances[i] + 1;
-                        local_count ++;
+                        local_count++;
                         frontier->vertices[neighbor_id] = iteration + 1;
                     }
                 }
@@ -101,10 +96,8 @@ void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration
         #pragma omp for reduction(+:local_count)
         for (int i = 0; i < g->num_nodes; i++){
             if (frontier->vertices[i] == 0) {
-
                 int start_edge = g->incoming_starts[i];
                 int end_edge = (i == g->num_nodes-1) ? g->num_edges : g->incoming_starts[i + 1];
-
                 for(int neighbor = start_edge; neighbor < end_edge; neighbor++) {
                     int neighbor_id = g->incoming_edges[neighbor];
                     if(frontier->vertices[neighbor_id] == iteration) {
@@ -138,16 +131,17 @@ void bfs_bottom_up(Graph graph, solution *sol)
     
     vertex_set_init(&list1, graph->num_nodes);
 
+    vertex_set* frontier = &list1; 
+
+    memset(frontier->vertices, 0, sizeof(int) * graph->num_nodes); 
+
     int iteration = 1;
 
-    vertex_set* frontier = &list1; 
-    memset(frontier->vertices, 0, sizeof(int) * graph->num_nodes);  
     // setup frontier & solution with root
     frontier->vertices[frontier->count++] = 1; 
-    // sol->distances[ROOT_NODE_ID] = 0;
     
     for (int i=0; i<graph->num_nodes; i++){
-        sol->distances[i] = 0;
+        sol->distances[i] = -1;
     }
 
     while(frontier->count != 0){
@@ -187,7 +181,6 @@ void bfs_hybrid(Graph graph, solution *sol)
     sol->distances[ROOT_NODE_ID] = 0;
 
     // set the root distance with 0
-    sol->distances[ROOT_NODE_ID] = 0;
     
     while (frontier->count != 0) {
         
