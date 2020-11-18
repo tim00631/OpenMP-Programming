@@ -116,7 +116,7 @@ void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration
                 int start_edge = g->incoming_starts[i];
                 int end_edge = (i == g->num_nodes-1) ? g->num_edges : g->incoming_starts[i + 1];
 
-                edges_in_frontier += outgoing_size(graph, i);
+                edges_in_frontier += outgoing_size(g, i);
 
                 for(int neighbor = start_edge; neighbor < end_edge; neighbor++) {
                     int neighbor_id = g->incoming_edges[neighbor];
