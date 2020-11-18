@@ -197,29 +197,29 @@ void bfs_hybrid(Graph graph, solution *sol)
     // set the root distance with 0
     
     while (frontier->count != 0) {
-        // int edges_in_frontier = 0;
-        // #pragma omp parallel for reduction(+: edges_in_frontier)
-        // for (int i = 0; i < frontier->count; i++){
-        //    edges_in_frontier += outgoing_size(graph,frontier->vertices[i]);
-        // }
+        int edges_in_frontier = 0;
+        #pragma omp parallel for reduction(+: edges_in_frontier)
+        for (int i = 0; i < frontier->count; i++){
+           edges_in_frontier += outgoing_size(graph,frontier->vertices[i]);
+        }
 
-        // if (edges_in_frontier > edges_to_check / ALPHA || frontier->count >= num_nodes(graph)/BETA) {
-        //     frontier->count = 0;
-        //     bottom_up_step(graph, frontier, sol->distances, iteration);
-        // }
-        // else {
-        //     edges_to_check -= edges_in_frontier;
-        //     frontier->count = 0;
-        //     top_down_step(graph, frontier, sol->distances, iteration);
-        // }
-        if(frontier->count >= THRESHOLD) {
+        if (edges_in_frontier > edges_to_check / ALPHA || frontier->count >= num_nodes(graph)/BETA) {
             frontier->count = 0;
             bottom_up_step(graph, frontier, sol->distances, iteration);
         }
         else {
+            edges_to_check -= edges_in_frontier;
             frontier->count = 0;
             top_down_step(graph, frontier, sol->distances, iteration);
         }
+        // if(frontier->count >= THRESHOLD) {
+        //     frontier->count = 0;
+        //     bottom_up_step(graph, frontier, sol->distances, iteration);
+        // }
+        // else {
+        //     frontier->count = 0;
+        //     top_down_step(graph, frontier, sol->distances, iteration);
+        // }
 
         iteration++;
 
