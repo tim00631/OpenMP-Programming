@@ -10,9 +10,7 @@
 #include "../common/graph.h"
 
 #define ROOT_NODE_ID 0
-// #define NOT_VISITED_MARKER -1
 #define NOT_VISITED_MARKER 0
-// #define THRESHOLD 500000
 #define ALPHA 14
 #define BETA 24
 // #define VERBOSE 1
@@ -171,15 +169,15 @@ void bfs_bottom_up(Graph graph, solution *sol)
 
     while(frontier->count != 0) {
         frontier->count = 0;
-// #ifdef VERBOSE
-//         double start_time = CycleTimer::currentSeconds();
-// #endif
+#ifdef VERBOSE
+        double start_time = CycleTimer::currentSeconds();
+#endif
         bottom_up_step(graph, frontier, sol->distances, iteration);
 
-// #ifdef VERBOSE
-//         double end_time = CycleTimer::currentSeconds();
-//         printf("frontier=%-10d %.4f sec\n", frontier->count, end_time - start_time);
-// #endif
+#ifdef VERBOSE
+        double end_time = CycleTimer::currentSeconds();
+        printf("frontier=%-10d %.4f sec\n", frontier->count, end_time - start_time);
+#endif
         iteration++;
     }
 
@@ -210,16 +208,12 @@ void bfs_hybrid(Graph graph, solution *sol)
 
     frontier->vertices[frontier->count++] = 1;
 
+    // set the root distance with 0
     sol->distances[ROOT_NODE_ID] = 0;
 
-    // set the root distance with 0
     
     while (frontier->count != 0) {
-        // int edges_in_frontier = 0;
-        // #pragma omp parallel for reduction(+: edges_in_frontier)
-        // for (int i = 0; i < frontier->count; i++) {
-        //    edges_in_frontier += outgoing_size(graph,frontier->vertices[i]);
-        // }
+
         if (isTopDown) {
             if (edges_in_frontier > edges_to_check / ALPHA) {
                 frontier->count = 0;
@@ -244,16 +238,6 @@ void bfs_hybrid(Graph graph, solution *sol)
             }
             iteration++;
         }
-
-        // if(frontier->count >= THRESHOLD) {
-        //     frontier->count = 0;
-        //     bottom_up_step(graph, frontier, sol->distances, iteration);
-        // }
-        // else {
-        //     frontier->count = 0;
-        //     top_down_step(graph, frontier, sol->distances, iteration);
-        // }
-
 
     }     
 }
