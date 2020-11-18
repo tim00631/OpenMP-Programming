@@ -16,6 +16,8 @@
 #define ALPHA 14
 #define BETA 24
 // #define VERBOSE 1
+int edges_to_check = 0;
+
 void vertex_set_clear(vertex_set *list)
 {
     list->count = 0;
@@ -34,13 +36,16 @@ void vertex_set_init(vertex_set *list, int count)
 int top_down_step(Graph g, vertex_set *frontier, int *distances, int iteration)
 {
     int local_count = 0;
+    int edges_in_frontier = 0;
     #pragma omp parallel
     {
-        #pragma omp for reduction(+: local_count)
+        #pragma omp for reduction(+: local_count, edges_in_frontier)
         for (int i = 0; i < g->num_nodes; i++) {
             if (frontier->vertices[i] == iteration) {
                 int start_edge = g->outgoing_starts[i];
                 int end_edge = (i == g->num_nodes-1) ? g->num_edges : g->outgoing_starts[i+1];
+
+                edges_in_frontier += outgoing_size(g, i);
 
                 for (int neighbor = start_edge; neighbor < end_edge; neighbor++) {
                     int neighbor_id = g->outgoing_edges[neighbor];
@@ -54,6 +59,9 @@ int top_down_step(Graph g, vertex_set *frontier, int *distances, int iteration)
         }
     }
     frontier->count = local_count;
+    if(edges_to_check >= 0){
+        edges_to_check -= edges_in_frontier;
+    }
 }
 
 // Implements top-down BFS.
@@ -99,13 +107,17 @@ void bfs_top_down(Graph graph, solution *sol)
 void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration)
 {
     int local_count = 0;
+    int edges_in_frontier = 0;
     #pragma omp parallel
     {
-        #pragma omp for reduction(+:local_count)
+        #pragma omp for reduction(+:local_count, edges_in_frontier)
         for (int i = 0; i < g->num_nodes; i++){
             if (frontier->vertices[i] == NOT_VISITED_MARKER) {
                 int start_edge = g->incoming_starts[i];
                 int end_edge = (i == g->num_nodes-1) ? g->num_edges : g->incoming_starts[i + 1];
+
+                edges_in_frontier += outgoing_size(graph, i);
+
                 for(int neighbor = start_edge; neighbor < end_edge; neighbor++) {
                     int neighbor_id = g->incoming_edges[neighbor];
                     if(frontier->vertices[neighbor_id] == iteration) {
@@ -119,6 +131,9 @@ void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration
         }
     }
     frontier->count = local_count;
+    if(edges_to_check >= 0){
+        edges_to_check -= edges_in_frontier;
+    }
 }
 
 void bfs_bottom_up(Graph graph, solution *sol)
@@ -186,7 +201,7 @@ void bfs_hybrid(Graph graph, solution *sol)
 
     int iteration = 1;
 
-    int edges_to_check = num_edges(graph); // init unexplored edges
+    edges_to_check = num_edges(graph); // init unexplored edges
     /// setup frontier with root
     memset(frontier->vertices, 0, sizeof(int) * graph->num_nodes);
 
@@ -198,10 +213,10 @@ void bfs_hybrid(Graph graph, solution *sol)
     
     while (frontier->count != 0) {
         int edges_in_frontier = 0;
-        #pragma omp parallel for reduction(+: edges_in_frontier)
-        for (int i = 0; i < frontier->count; i++){
-           edges_in_frontier += outgoing_size(graph,frontier->vertices[i]);
-        }
+        // #pragma omp parallel for reduction(+: edges_in_frontier)
+        // for (int i = 0; i < frontier->count; i++) {
+        //    edges_in_frontier += outgoing_size(graph,frontier->vertices[i]);
+        // }
 
         if (edges_in_frontier > edges_to_check / ALPHA || frontier->count >= num_nodes(graph)/BETA) {
             frontier->count = 0;
