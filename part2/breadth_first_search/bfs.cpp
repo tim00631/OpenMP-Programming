@@ -188,7 +188,7 @@ void bfs_hybrid(Graph graph, solution *sol)
 
 
     int iteration = 1;
-    int isTopDown = True;
+    int isTopDown = true;
     int CBT = num_nodes(graph)/BETA;
     mu = num_edges(graph); // init unexplored edges
 
