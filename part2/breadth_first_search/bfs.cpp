@@ -12,7 +12,7 @@
 #define ROOT_NODE_ID 0
 // #define NOT_VISITED_MARKER -1
 #define NOT_VISITED_MARKER 0
-#define THRESHOLD 1000000
+#define THRESHOLD 500000
 // #define VERBOSE 1
 
 
