@@ -38,7 +38,7 @@ void top_down_step(Graph g, vertex_set *frontier, int *distances, int iteration)
     int local_count = 0;
     #pragma omp parallel
     {
-        #pragma omp for reduction(+: local_count)
+        #pragma omp for reduction(+: local_count, mu)
         for (int i = 0; i < g->num_nodes; i++) {
             if(frontier->vertices[i] == iteration) {
                 int start_edge = g->outgoing_starts[i];
@@ -103,7 +103,7 @@ void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration
     int local_count = 0;
     #pragma omp parallel
     {
-        #pragma omp for reduction(+:local_count)
+        #pragma omp for reduction(+:local_count, mu)
         for (int i = 0; i < g->num_nodes; i++){
             if (frontier->vertices[i] == NOT_VISITED_MARKER) {
                 int start_edge = g->incoming_starts[i];
