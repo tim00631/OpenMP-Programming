@@ -17,7 +17,7 @@
 #define BETA 24
 // #define VERBOSE 1
 int edges_to_check = 0;
-
+int edges_in_frontier = 0;
 void vertex_set_clear(vertex_set *list)
 {
     list->count = 0;
@@ -36,7 +36,7 @@ void vertex_set_init(vertex_set *list, int count)
 int top_down_step(Graph g, vertex_set *frontier, int *distances, int iteration)
 {
     int local_count = 0;
-    int edges_in_frontier = 0;
+    edges_in_frontier = 0;
     #pragma omp parallel
     {
         #pragma omp for reduction(+: local_count, edges_in_frontier)
@@ -107,7 +107,7 @@ void bfs_top_down(Graph graph, solution *sol)
 void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration)
 {
     int local_count = 0;
-    int edges_in_frontier = 0;
+    edges_in_frontier = 0;
     #pragma omp parallel
     {
         #pragma omp for reduction(+:local_count, edges_in_frontier)
