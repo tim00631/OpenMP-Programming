@@ -16,8 +16,6 @@
 #define ALPHA 14
 #define BETA 24
 // #define VERBOSE 1
-int edges_to_check = 0;
-int edges_in_frontier = 0;
 void vertex_set_clear(vertex_set *list)
 {
     list->count = 0;
@@ -189,7 +187,6 @@ void bfs_hybrid(Graph graph, solution *sol)
     int iteration = 1;
 
     int edges_to_check = num_edges(graph); // init unexplored edges
-    int edges_in_frontier = 0;
     /// setup frontier with root
     memset(frontier->vertices, 0, sizeof(int) * graph->num_nodes);
 
@@ -200,27 +197,28 @@ void bfs_hybrid(Graph graph, solution *sol)
     // set the root distance with 0
     
     while (frontier->count != 0) {
-        // for (int i = 0; i < frontier->count; i++){
-        //    edges_in_frontier += outgoing_size(graph,frontier[i]);
-        // }
-        // if (edges_in_frontier > edges_to_check / ALPHA) {
-        //     frontier->count = 0;
-        //     // printf("do bottom-up bfs, mf:%d > CTB: %d\n", frontier->count)
-        //     bottom_up_step(graph, frontier, sol->distances, iteration);
-        // }
-        // else {
-        //     edges_to_check -= edges_in_frontier;
-        //     frontier->count = 0;
-        //     top_down_step(graph, frontier, sol->distances, iteration);
-        // }
-        if(frontier->count >= THRESHOLD) {
+        int edges_in_frontier = 0;
+        for (int i = 0; i < frontier->count; i++){
+           edges_in_frontier += outgoing_size(graph,frontier[i]);
+        }
+
+        if (edges_in_frontier > edges_to_check / ALPHA || frontier->count >= num_nodes(graph)/BETA) {
             frontier->count = 0;
             bottom_up_step(graph, frontier, sol->distances, iteration);
         }
         else {
+            edges_to_check -= edges_in_frontier;
             frontier->count = 0;
             top_down_step(graph, frontier, sol->distances, iteration);
         }
+        // if(frontier->count >= THRESHOLD) {
+        //     frontier->count = 0;
+        //     bottom_up_step(graph, frontier, sol->distances, iteration);
+        // }
+        // else {
+        //     frontier->count = 0;
+        //     top_down_step(graph, frontier, sol->distances, iteration);
+        // }
 
         iteration++;
 
