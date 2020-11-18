@@ -12,7 +12,7 @@
 #define ROOT_NODE_ID 0
 #define NOT_VISITED_MARKER -1
 #define THRESHOLD 10000000
-#define VERBOSE 1
+// #define VERBOSE 1
 
 
 void vertex_set_clear(vertex_set *list)
@@ -86,6 +86,7 @@ void bfs_top_down(Graph graph, solution *sol)
 #endif
         iteration++;
     }
+    
 }
 
 void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration)
@@ -140,9 +141,9 @@ void bfs_bottom_up(Graph graph, solution *sol)
     // setup frontier & solution with root
     frontier->vertices[frontier->count++] = 1; 
     
-    for (int i=0; i<graph->num_nodes; i++) {
-        sol->distances[i] = 0;
-    }
+    // for (int i=0; i<graph->num_nodes; i++) {
+    //     sol->distances[i] = 0;
+    // }
 
     while(frontier->count != 0){
         frontier->count = 0;
