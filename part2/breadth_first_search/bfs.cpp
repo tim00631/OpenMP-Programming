@@ -16,8 +16,8 @@
 #define ALPHA 14
 #define BETA 24
 // #define VERBOSE 1
-int mu;
-
+int edges_to_check = 0;
+int edges_in_frontier = 0;
 void vertex_set_clear(vertex_set *list)
 {
     list->count = 0;
@@ -33,20 +33,20 @@ void vertex_set_init(vertex_set *list, int count)
 // Take one step of "top-down" BFS.  For each vertex on the frontier,
 // follow all outgoing edges, and add all neighboring vertices to the
 // new_frontier.
-void top_down_step(Graph g, vertex_set *frontier, int *distances, int iteration)
+int top_down_step(Graph g, vertex_set *frontier, int *distances, int iteration)
 {
     int local_count = 0;
     #pragma omp parallel
     {
-        #pragma omp for reduction(+: local_count, mu)
+        #pragma omp for reduction(+: local_count)
         for (int i = 0; i < g->num_nodes; i++) {
-            if(frontier->vertices[i] == iteration) {
+            if (frontier->vertices[i] == iteration) {
                 int start_edge = g->outgoing_starts[i];
                 int end_edge = (i == g->num_nodes-1) ? g->num_edges : g->outgoing_starts[i+1];
-                mu -= (end_edge-start_edge);
+
                 for (int neighbor = start_edge; neighbor < end_edge; neighbor++) {
                     int neighbor_id = g->outgoing_edges[neighbor];
-                    if(frontier->vertices[neighbor_id] == NOT_VISITED_MARKER) {
+                    if (frontier->vertices[neighbor_id] == NOT_VISITED_MARKER) {
                         distances[neighbor_id] = distances[i] + 1;
                         local_count++;
                         frontier->vertices[neighbor_id] = iteration + 1;
@@ -73,7 +73,7 @@ void bfs_top_down(Graph graph, solution *sol)
 
     int iteration = 1;
 
-    frontier->vertices[frontier->count++] = 1;
+    frontier->vertices[frontier->count++] = ROOT_NODE_ID;
     sol->distances[ROOT_NODE_ID] = 0;
 
     while (frontier->count != 0)
@@ -91,11 +91,11 @@ void bfs_top_down(Graph graph, solution *sol)
         iteration++;
     }
 
-    #pragma omp parallel for
-    for (int i=0; i<graph->num_nodes; i++) {
-        if(sol->distances[i] == 0 && i != ROOT_NODE_ID)
-            sol->distances[i] = -1; // this node is unreachable
-    }
+    // #pragma omp parallel for
+    // for (int i=0; i<graph->num_nodes; i++) {
+    //     if(sol->distances[i] == 0 && i != ROOT_NODE_ID)
+    //         sol->distances[i] = -1; // this node is unreachable
+    // }
 }
 
 void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration)
@@ -103,12 +103,11 @@ void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration
     int local_count = 0;
     #pragma omp parallel
     {
-        #pragma omp for reduction(+:local_count, mu)
+        #pragma omp for reduction(+:local_count)
         for (int i = 0; i < g->num_nodes; i++){
             if (frontier->vertices[i] == NOT_VISITED_MARKER) {
                 int start_edge = g->incoming_starts[i];
                 int end_edge = (i == g->num_nodes-1) ? g->num_edges : g->incoming_starts[i + 1];
-                mu -= (end_edge - start_edge);
                 for(int neighbor = start_edge; neighbor < end_edge; neighbor++) {
                     int neighbor_id = g->incoming_edges[neighbor];
                     if(frontier->vertices[neighbor_id] == iteration) {
@@ -147,7 +146,7 @@ void bfs_bottom_up(Graph graph, solution *sol)
     int iteration = 1;
 
     // setup frontier & solution with root
-    frontier->vertices[frontier->count++] = 1; 
+    frontier->vertices[frontier->count++] = ROOT_NODE_ID; 
     
     #pragma omp parallel for
     for (int i=0; i<graph->num_nodes; i++) {
@@ -168,11 +167,11 @@ void bfs_bottom_up(Graph graph, solution *sol)
         iteration++;
     }
 
-    #pragma omp parallel for
-    for (int i=0; i<graph->num_nodes; i++) {
-        if(sol->distances[i] == 0 && i != ROOT_NODE_ID)
-            sol->distances[i] = -1; // this node is unreachable
-    }
+    // #pragma omp parallel for
+    // for (int i=0; i<graph->num_nodes; i++) {
+    //     if(sol->distances[i] == 0 && i != ROOT_NODE_ID)
+    //         sol->distances[i] = -1; // this node is unreachable
+    // }
 }
 
 void bfs_hybrid(Graph graph, solution *sol)
@@ -188,50 +187,40 @@ void bfs_hybrid(Graph graph, solution *sol)
 
 
     int iteration = 1;
-    int isTopDown = true;
-    int CBT = num_nodes(graph)/BETA;
-    mu = num_edges(graph); // init unexplored edges
 
+    int edges_to_check = num_edges(graph); // init unexplored edges
+    int edges_in_frontier = 0;
     /// setup frontier with root
     memset(frontier->vertices, 0, sizeof(int) * graph->num_nodes);
 
-    frontier->vertices[frontier->count++] = 1;
+    frontier->vertices[frontier->count++] = 0;
 
     sol->distances[ROOT_NODE_ID] = 0;
 
     // set the root distance with 0
     
     while (frontier->count != 0) {
-        if(isTopDown){
-            int CTB = mu/ALPHA;
-
-            if(frontier->count > CTB) {
-                frontier->count = 0;
-                bottom_up_step(graph, frontier, sol->distances, iteration);
-            }
-            else {
-                frontier->count = 0;
-                top_down_step(graph, frontier, sol->distances, iteration);
-            }
-        }
-        else {
-            if(frontier->count >= CBT) {
-                frontier->count = 0;
-                bottom_up_step(graph, frontier, sol->distances, iteration);
-            }
-            else {
-                frontier->count = 0;
-                top_down_step(graph, frontier, sol->distances, iteration);
-            }
-        }
-        // if(frontier->count >= THRESHOLD) {
+        // for (int i = 0; i < frontier->count; i++){
+        //    edges_in_frontier += outgoing_size(graph,frontier[i]);
+        // }
+        // if (edges_in_frontier > edges_to_check / ALPHA) {
         //     frontier->count = 0;
+        //     // printf("do bottom-up bfs, mf:%d > CTB: %d\n", frontier->count)
         //     bottom_up_step(graph, frontier, sol->distances, iteration);
         // }
         // else {
+        //     edges_to_check -= edges_in_frontier;
         //     frontier->count = 0;
         //     top_down_step(graph, frontier, sol->distances, iteration);
         // }
+        if(frontier->count >= THRESHOLD) {
+            frontier->count = 0;
+            bottom_up_step(graph, frontier, sol->distances, iteration);
+        }
+        else {
+            frontier->count = 0;
+            top_down_step(graph, frontier, sol->distances, iteration);
+        }
 
         iteration++;
 
