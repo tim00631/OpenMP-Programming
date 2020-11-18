@@ -12,7 +12,7 @@
 #define ROOT_NODE_ID 0
 // #define NOT_VISITED_MARKER -1
 #define NOT_VISITED_MARKER 0
-#define THRESHOLD 10000000
+#define THRESHOLD 1000000
 #define VERBOSE 1
 
 
@@ -66,7 +66,7 @@ void bfs_top_down(Graph graph, solution *sol)
     vertex_set list1;
     vertex_set_init(&list1, graph->num_nodes);
     vertex_set *frontier = &list1;
-    
+
     memset(frontier->vertices, 0, sizeof(int) * graph->num_nodes);
 
     int iteration = 1;
