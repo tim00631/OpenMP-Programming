@@ -44,8 +44,10 @@ int top_down_step(Graph g, vertex_set *frontier, int *distances, int iteration)
             if (frontier->vertices[i] == iteration) {
                 int start_edge = g->outgoing_starts[i];
                 int end_edge = (i == g->num_nodes-1) ? g->num_edges : g->outgoing_starts[i+1];
-
-                edges_in_frontier += outgoing_size(g, i);
+                
+                if(edges_to_check > 0) {
+                    edges_in_frontier += outgoing_size(g, i);
+                }
 
                 for (int neighbor = start_edge; neighbor < end_edge; neighbor++) {
                     int neighbor_id = g->outgoing_edges[neighbor];
@@ -59,7 +61,7 @@ int top_down_step(Graph g, vertex_set *frontier, int *distances, int iteration)
         }
     }
     frontier->count = local_count;
-    if(edges_to_check >= 0){
+    if(edges_to_check > 0){
         edges_to_check -= edges_in_frontier;
     }
 }
@@ -115,9 +117,9 @@ void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration
             if (frontier->vertices[i] == NOT_VISITED_MARKER) {
                 int start_edge = g->incoming_starts[i];
                 int end_edge = (i == g->num_nodes-1) ? g->num_edges : g->incoming_starts[i + 1];
-
-                edges_in_frontier += outgoing_size(g, i);
-
+                if(edges_to_check > 0) {
+                    edges_in_frontier += outgoing_size(g, i);
+                }
                 for(int neighbor = start_edge; neighbor < end_edge; neighbor++) {
                     int neighbor_id = g->incoming_edges[neighbor];
                     if(frontier->vertices[neighbor_id] == iteration) {
@@ -131,7 +133,7 @@ void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration
         }
     }
     frontier->count = local_count;
-    if(edges_to_check >= 0){
+    if(edges_to_check > 0){
         edges_to_check -= edges_in_frontier;
     }
 }
