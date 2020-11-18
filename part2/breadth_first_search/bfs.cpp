@@ -12,12 +12,13 @@
 #define ROOT_NODE_ID 0
 // #define NOT_VISITED_MARKER -1
 #define NOT_VISITED_MARKER 0
-#define THRESHOLD 500000
+// #define THRESHOLD 500000
 #define ALPHA 14
 #define BETA 24
 // #define VERBOSE 1
 int edges_to_check = 0;
 int edges_in_frontier = 0;
+
 void vertex_set_clear(vertex_set *list)
 {
     list->count = 0;
@@ -219,39 +220,39 @@ void bfs_hybrid(Graph graph, solution *sol)
         // for (int i = 0; i < frontier->count; i++) {
         //    edges_in_frontier += outgoing_size(graph,frontier->vertices[i]);
         // }
-        if (isTopDown) {
-            if (edges_in_frontier > edges_to_check / ALPHA) {
-                frontier->count = 0;
-                bottom_up_step(graph, frontier, sol->distances, iteration);
-                isTopDown = false;
-            }
-            else {
-                frontier->count = 0;
-                top_down_step(graph, frontier, sol->distances, iteration);
-            }
-            iteration++;
-        }
-        else {
-            if (frontier->count >= num_nodes(graph)/BETA) {
-                frontier->count = 0;
-                bottom_up_step(graph, frontier, sol->distances, iteration);
-            }
-            else {
-                frontier->count = 0;
-                top_down_step(graph, frontier, sol->distances, iteration);
-                isTopDown = true;
-            }
-            iteration++;
-        }
-
-        // if(frontier->count >= THRESHOLD) {
-        //     frontier->count = 0;
-        //     bottom_up_step(graph, frontier, sol->distances, iteration);
+        // if (isTopDown) {
+        //     if (edges_in_frontier > edges_to_check / ALPHA) {
+        //         frontier->count = 0;
+        //         bottom_up_step(graph, frontier, sol->distances, iteration);
+        //         isTopDown = false;
+        //     }
+        //     else {
+        //         frontier->count = 0;
+        //         top_down_step(graph, frontier, sol->distances, iteration);
+        //     }
+        //     iteration++;
         // }
         // else {
-        //     frontier->count = 0;
-        //     top_down_step(graph, frontier, sol->distances, iteration);
+        //     if (frontier->count >= num_nodes(graph)/BETA) {
+        //         frontier->count = 0;
+        //         bottom_up_step(graph, frontier, sol->distances, iteration);
+        //     }
+        //     else {
+        //         frontier->count = 0;
+        //         top_down_step(graph, frontier, sol->distances, iteration);
+        //         isTopDown = true;
+        //     }
+        //     iteration++;
         // }
+
+        if(frontier->count >= THRESHOLD) {
+            frontier->count = 0;
+            bottom_up_step(graph, frontier, sol->distances, iteration);
+        }
+        else {
+            frontier->count = 0;
+            top_down_step(graph, frontier, sol->distances, iteration);
+        }
 
 
     }     
