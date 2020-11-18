@@ -159,7 +159,7 @@ void bfs_bottom_up(Graph graph, solution *sol)
         iteration++;
     }
     for (int i=0; i<graph->num_nodes; i++) {
-        if(sol->distances[i] == 0)
+        if(sol->distances[i] == 0 && i != ROOT_NODE_ID)
             sol->distances[i] = -1;
     }
 }
