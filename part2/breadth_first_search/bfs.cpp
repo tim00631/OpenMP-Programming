@@ -13,8 +13,10 @@
 // #define NOT_VISITED_MARKER -1
 #define NOT_VISITED_MARKER 0
 #define THRESHOLD 500000
+#define ALPHA 14
+#define BETA 24
 // #define VERBOSE 1
-
+int mu;
 
 void vertex_set_clear(vertex_set *list)
 {
@@ -41,7 +43,7 @@ void top_down_step(Graph g, vertex_set *frontier, int *distances, int iteration)
             if(frontier->vertices[i] == iteration) {
                 int start_edge = g->outgoing_starts[i];
                 int end_edge = (i == g->num_nodes-1) ? g->num_edges : g->outgoing_starts[i+1];
-
+                mu -= (end_edge-start_edge);
                 for (int neighbor = start_edge; neighbor < end_edge; neighbor++) {
                     int neighbor_id = g->outgoing_edges[neighbor];
                     if(frontier->vertices[neighbor_id] == NOT_VISITED_MARKER) {
@@ -106,6 +108,7 @@ void bottom_up_step(Graph g, vertex_set* frontier, int* distances, int iteration
             if (frontier->vertices[i] == NOT_VISITED_MARKER) {
                 int start_edge = g->incoming_starts[i];
                 int end_edge = (i == g->num_nodes-1) ? g->num_edges : g->incoming_starts[i + 1];
+                mu -= (end_edge - start_edge);
                 for(int neighbor = start_edge; neighbor < end_edge; neighbor++) {
                     int neighbor_id = g->incoming_edges[neighbor];
                     if(frontier->vertices[neighbor_id] == iteration) {
@@ -151,7 +154,7 @@ void bfs_bottom_up(Graph graph, solution *sol)
         sol->distances[i] = 0;
     }
 
-    while(frontier->count != 0){
+    while(frontier->count != 0) {
         frontier->count = 0;
 #ifdef VERBOSE
         double start_time = CycleTimer::currentSeconds();
@@ -185,6 +188,9 @@ void bfs_hybrid(Graph graph, solution *sol)
 
 
     int iteration = 1;
+    int isTopDown = True;
+    int CBT = num_nodes(graph)/BETA;
+    mu = num_edges(graph); // init unexplored edges
 
     /// setup frontier with root
     memset(frontier->vertices, 0, sizeof(int) * graph->num_nodes);
@@ -196,15 +202,36 @@ void bfs_hybrid(Graph graph, solution *sol)
     // set the root distance with 0
     
     while (frontier->count != 0) {
-        
-        if(frontier->count >= THRESHOLD) {
-            frontier->count = 0;
-            bottom_up_step(graph, frontier, sol->distances, iteration);
+        if(isTopDown){
+            int CTB = mu/ALPHA;
+
+            if(frontier->count > CTB) {
+                frontier->count = 0;
+                bottom_up_step(graph, frontier, sol->distances, iteration);
+            }
+            else {
+                frontier->count = 0;
+                top_down_step(graph, frontier, sol->distances, iteration);
+            }
         }
         else {
-            frontier->count = 0;
-            top_down_step(graph, frontier, sol->distances, iteration);
+            if(frontier->count >= CBT) {
+                frontier->count = 0;
+                bottom_up_step(graph, frontier, sol->distances, iteration);
+            }
+            else {
+                frontier->count = 0;
+                top_down_step(graph, frontier, sol->distances, iteration);
+            }
         }
+        // if(frontier->count >= THRESHOLD) {
+        //     frontier->count = 0;
+        //     bottom_up_step(graph, frontier, sol->distances, iteration);
+        // }
+        // else {
+        //     frontier->count = 0;
+        //     top_down_step(graph, frontier, sol->distances, iteration);
+        // }
 
         iteration++;
 
